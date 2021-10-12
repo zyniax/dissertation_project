@@ -1,0 +1,28 @@
+.visually-hidden {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
+
+
+.news_with_scroll {
+    height: 500px;
+    overflow-y: scroll;
+    z-index:1;
+}
+
+.news_image_on_hover{
+    width: 400px;
+    height: 400px;
+    margin-left: 360px;
+    margin-bottom: 1000px;
+    border-radius: 15px;
+    position: absolute;
+    z-index: 100;
+}
+
+
