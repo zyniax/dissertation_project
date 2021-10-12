@@ -15,8 +15,9 @@ export const ThreeDImageVisualization = (filteredNews) => {
     const [clickedImage, setClickedImage] = useState("")
 
     useEffect(()=>{
+        //http://localhost:3000/api/request/umap3D
 
-        axios.get('http://localhost:3000/api/request/umap3D',{
+        axios.get('https://dissertationserver.herokuapp.com/api/request/umap3D',{
             headers: {
                 'Access-Control-Allow-Origin': 'http://localhost:3000',
                 'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
@@ -220,7 +221,7 @@ var planeTest;
                         scene.remove(obj);
                     }
 
-                    axios.get('http://localhost:3000/api/request/umap3D',{
+                    axios.get('https://dissertationserver.herokuapp.com/api/request/umap3D',{
                         headers: {
                             'Access-Control-Allow-Origin': 'http://localhost:3000',
                             'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
