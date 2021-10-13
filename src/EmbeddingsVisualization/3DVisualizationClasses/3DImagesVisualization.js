@@ -386,7 +386,7 @@ var planeTest;
             dir.normalize();
 
             const origin = new THREE.Vector3( 0, 0, planeTest.position.z );
-            const length = 100;
+            const length = 50;
             const hex = 0xffff00;
 
             const arrowHelper = new THREE.ArrowHelper( dir, origin, length, hex );
@@ -493,7 +493,7 @@ var planeTest;
                 ThreeMeshUI.update();
                 circle.position.x =  camera.position.x
                 circle.position.y =  camera.position.y
-                 arrowHelper.position.x = camera.position.x
+                 arrowHelper.position.x = (camera.position.x)
                  arrowHelper.position.y = camera.position.y
                 //arrowHelper.setDirection(new THREE.Vector3(300, 40, 0))
 

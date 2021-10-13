@@ -95,7 +95,6 @@ function App() {
 
         <Manual_cropper image={image}/>
 
-        <Embedding_visualization/>
         <ThreeDImageVisualization filteredNews={filteredNews}/>
 
       </>
