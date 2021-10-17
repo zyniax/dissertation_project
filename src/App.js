@@ -44,6 +44,7 @@ function App() {
             console.log(data.hits.hits[0]._source.pub_date)
             console.log(data.hits.hits[0]._source)
             setFilteredNews(data.hits.hits)
+            console.log(data)
 
     });
 
