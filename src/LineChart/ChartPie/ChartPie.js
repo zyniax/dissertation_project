@@ -3,7 +3,7 @@ import './ChartPie.css'
 import {Card, Col, Row, Carousel, Container} from "react-bootstrap";
 
 import * as d3 from 'd3';
-import Line_chart from "../linechart";
+import Line_chart from "../LineChart";
 
 
 export const Chart_Pie = ({percentage}) => {
@@ -98,9 +98,7 @@ export const Chart_Pie = ({percentage}) => {
     }, [percentage])
 
     return (
-        <div style={{marginLeft: '-20px', marginTop: '-10px'}} ref={svgRef}>
-
-        </div>
+        <div style={{marginLeft: '-20px', marginTop: '-10px'}} ref={svgRef}/>
     );
 
 

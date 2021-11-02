@@ -1,11 +1,12 @@
 import logo from './logo.svg';
-import Line_chart from "./LineChart/linechart";
+import Line_chart from "./LineChart/LineChart";
 import NewsSearch from "./NewsSearch/NewsSearch";
 import './App.css';
 import {Background} from "./BackgroundVisualization";
 import SearchBars from "./SearchBars/SearchBars";
 import Manual_cropper from "./ManualCroppingImage/ManualCroppingImage";
 import Tooltip from "./Tooltip/Tooltip";
+import ThreeDWorldVisualization from "./3DWorldVisualization/ThreeDWorldVisualization";
 import Graph_visualization from "./GraphVisualization/GraphVisualization";
 import React, {useEffect, useState} from "react";
 import NavBar from './Navbar Components/Navbar'
@@ -15,12 +16,15 @@ import Chart_Pie from "./LineChart/ChartPie/ChartPie";
 import {Card, Col, Row, ListGroup} from "react-bootstrap";
 import Embedding_visualization from "./EmbeddingsVisualization/2DVisualizationTest";
 import ThreeDImageVisualization from "./EmbeddingsVisualization/3DVisualizationClasses/3DImagesVisualization";
+import HorizontalBarChart from "./LineChart/HorizontalBarChart/HorizontalBarChart";
+import Graph_visualization2 from "./GraphVisualization/GraphVisualization2";
 
 
 function App() {
     const [image, setImageSrc] = useState("");
     const [brushExtent, setBrushExtent] = useState([]);
     const [filteredNews, setFilteredNews] = useState([]);
+    const [keywords, setKeywords] = useState([]);
 
 
 
@@ -62,7 +66,7 @@ function App() {
 
 
           <div className="SearchBarsDiv" style={{marginBottom: "10px", marginTop: "20px"}}>
-              <SearchBars setFilteredNews={setFilteredNews} />
+              <SearchBars setFilteredNews={setFilteredNews} setKeywords={setKeywords} />
           </div>
 
 
@@ -74,6 +78,7 @@ function App() {
             <Card border="light">
               <div style={{float:"left", marginBottom: '100px'}}>
                   <Line_chart setBrushExtent={setBrushExtent} style={{float:"left"}} setFilteredNews={setFilteredNews} filteredNews={filteredNews}  />
+                  <HorizontalBarChart keywords={keywords} filteredNews={filteredNews} setFilteredNews={setFilteredNews}/>
                   <RelevantHeadlines brushExtent={brushExtent} />
 
               </div>
@@ -92,11 +97,15 @@ function App() {
 
 
 
-        <Graph_visualization/>
 
+          <Graph_visualization/>
         <Manual_cropper image={image}/>
 
+        <ThreeDWorldVisualization setFilteredNews={setFilteredNews}/>
+
         <ThreeDImageVisualization filteredNews={filteredNews}/>
+
+
 
       </>
 

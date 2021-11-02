@@ -10,6 +10,7 @@ import axios from "axios";
 
 
 const NewsSearch = ({filteredNews, setImageSrc}) => {
+    console.log("este é o filtered news do newsSearch")
     console.log(filteredNews)
 
     const [newsCollection, setnewsCollection] = useState([]);

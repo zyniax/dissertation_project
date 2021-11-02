@@ -1,25 +1,12 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
-  "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    },
-    {
-      "src": "logo192.png",
-      "type": "image/png",
-      "sizes": "192x192"
-    },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512"
-    }
+  "nodes":[
+    {"name":"node1","group":1},
+    {"name":"node2","group":2},
+    {"name":"node3","group":2},
+    {"name":"node4","group":3}
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "links":[
+    {"source":2,"target":1,"weight":1},
+    {"source":0,"target":2,"weight":3}
+  ]
 }

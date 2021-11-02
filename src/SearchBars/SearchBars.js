@@ -4,7 +4,7 @@ import './SearchBars.css'
 import {useEffect, useState} from "react";
 
 
-const SearchBars = ({image, setFilteredNews}) => {
+const SearchBars = ({image, setFilteredNews, setKeywords}) => {
 
     const [searchTerm, setSearchTerm] = useState("")
 
@@ -44,7 +44,13 @@ const handleMouseClickRequest = () => {
     }).then(response =>{
 
         console.log("esta é a nova data mas nova nova")
-        setFilteredNews(response.data.body.hits.hits)
+        console.log(response.data)
+        setFilteredNews(response.data.searchWordResult.body.hits.hits)
+        setKeywords(response.data.keywords)
+        console.log("oyeahyeah")
+        console.log(response.data.searchWordResult.body.hits.hits)
+        console.log(response.data.keywords)
+        //console.log(response.data.body.hits.hits)
 
     })
 }

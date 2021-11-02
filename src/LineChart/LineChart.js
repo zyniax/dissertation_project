@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from "react";
 import Tooltip from "../Tooltip/Tooltip";
 import Chart_Pie from "./ChartPie/ChartPie";
 import {Card, Col, Row, Carousel, Container} from "react-bootstrap";
+import HorizontalBarChart from "./HorizontalBarChart/HorizontalBarChart";
 
 import * as d3 from 'd3';
 
@@ -533,9 +534,8 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews}) => {
 
                 </Row>
             </Container>
-            <svg style={{marginTop: "10px"}} ref={svgRef}>
 
-            </svg>
+            <svg style={{marginTop: "10px"}} ref={svgRef}/>
         </div>
     );
 }

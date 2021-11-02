@@ -3,17 +3,21 @@ import { TWEEN } from 'three/examples/jsm/libs/tween.module.min'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import ThreeMeshUI from 'three-mesh-ui'
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls'
-//import './3DImageVisualization.css';
+import './3DImageVisualization.css';
 import { SelectionBox } from "./SelectionBox"
 import { SelectionHelper } from './SelectionHelper';
-import {useRef, useEffect, useState} from "react";
+import React, {useRef, useEffect, useState} from "react";
 import axios from "axios";
+import TextSprite from '@seregpie/three.text-sprite';
+import {Card, Carousel} from "react-bootstrap";
+import {FlakesTexture} from "three/examples/jsm/textures/FlakesTexture";
+import {RGBELoader} from "three/examples/jsm/loaders/RGBELoader";
 
 
 export const ThreeDImageVisualization = (filteredNews) => {
 
     const ref = useRef();
-    const [clickedImage, setClickedImage] = useState("")
+    const [clickedImage, setClickedImage] = useState("https://www.plataformamedia.com/wp-content/uploads/2020/09/dwayne.jpg")
 
     useEffect(()=>{
 
@@ -45,8 +49,15 @@ export const ThreeDImageVisualization = (filteredNews) => {
             document.body.appendChild((renderer.domElement))
             ref.current.appendChild(renderer.domElement);
 
+            //Create a new ambient light
+            var light = new THREE.AmbientLight( 0x888888,  )
+            scene.add( light )
 
-//create a sphere
+//Create a new directional light
+            var light = new THREE.DirectionalLight( 0xfdfcf0, 0.2 )
+            light.position.set(0,0,20)
+            scene.add( light )
+
 
 
             // instantiate a loader
@@ -91,6 +102,7 @@ var planeTest;
                 console.log(response)
 
                 for(var i = 0; i < response.data.embeddings.length; i++){
+                    const texture = new THREE.TextureLoader().load('https://large.novasearch.org/nytimes/images/206cd0c3321f129171d53aca579372662e99b8f946c01d27c42e10a8daf42f47.jpg');
                     const geometry = new THREE.PlaneGeometry(2, 2, 1);
                     const material = new THREE.MeshBasicMaterial({map: texture});
                     const plane= new THREE.Mesh(geometry, material);
@@ -135,10 +147,16 @@ var planeTest;
 
                 raycaster.setFromCamera( mouse, camera );
                 const intersects = raycaster.intersectObjects(scene.children, true);
-                var currentIntersection = null;
 
-                if (intersects.length > 0 && intersects[0].object.geometry.type === 'PlaneGeometry')
-                    flyToPanel(intersects[0].object.position)
+                console.log("este é o intersects")
+                console.log(intersects)
+
+                // se a interseção for maior do que 1 significa que clicou na esfera opaca e na fotografia com um só clique, ou seja o clique apanha tanto a esfera opaca como a fotografia
+                if(intersects.length > 1 && intersects[1].object.geometry.type === 'PlaneGeometry' && intersects[0].object.geometry.type === 'SphereGeometry' && intersects[0].object.visible === false)
+                    flyToObject(intersects[1].object)
+
+                else if (intersects.length > 0 && (intersects[0].object.geometry.type === 'PlaneGeometry' || (intersects[0].object.geometry.type === 'SphereGeometry' && intersects[0].object.visible === true)))
+                    flyToObject(intersects[0].object)
 
 
 
@@ -151,9 +169,9 @@ var planeTest;
 
                     //for ( let i = 0; i < selectionBox.collection.length; i ++ ) {
 
-                       // selectionBox.collection[ i ].material.color.set( 0x000000 );
+                    // selectionBox.collection[ i ].material.color.set( 0x000000 );
 
-
+                    console.log("asdasd")
 
                     //}
 
@@ -161,20 +179,21 @@ var planeTest;
                     let canvasBounds = renderer.domElement.getBoundingClientRect();
 
                     selectionBox.endPoint.set(
-                        ( ( event.clientX - canvasBounds.left ) / ( canvasBounds.right - canvasBounds.left ) ) * 2 -1,
-                        - ( ( event.clientY - canvasBounds.top ) / ( canvasBounds.bottom - canvasBounds.top) ) * 2 + 1, 0);
+                        ((event.clientX - canvasBounds.left) / (canvasBounds.right - canvasBounds.left)) * 2 - 1,
+                        -((event.clientY - canvasBounds.top) / (canvasBounds.bottom - canvasBounds.top)) * 2 + 1, 0);
 
 
                     const allSelected = selectionBox.select();
 
-                   // for ( let i = 0; i < allSelected.length; i ++ ) {
+                    // for ( let i = 0; i < allSelected.length; i ++ ) {
 
-                     //   allSelected[ i ].material.color.set( 0xffffff );
+                    //   allSelected[ i ].material.color.set( 0xffffff );
 
-                   // }
+                    // }
 
 
-            } })
+                }
+            })
 
             renderer.domElement.addEventListener( 'pointerup', function ( event ) {
                 let canvasBounds = renderer.domElement.getBoundingClientRect();
@@ -207,16 +226,56 @@ var planeTest;
                 const intersects = raycaster.intersectObjects(scene.children, true);
                 var currentIntersection = null;
 
+
                 if (intersects.length > 0) {
                     currentIntersection = intersects[0].object;
                     arrowHelper.cone.material.opacity = 0
+
+                    if (intersects[0].object.geometry.type === 'PlaneGeometry')
+                        setClickedImage("https://www.palpitedigital.com/y/5327/imagens-google-e1604596848141.jpg")
+
+                    if (intersects[0].object.geometry.type === 'SphereGeometry')
+                        setClickedImage("https://www.palpitedigital.com/y/5327/imagens-google-e1604596848141.jpg")
+
                 } else {
-                    if (currentIntersection === null) {
+                    if (currentIntersection === null)
                         arrowHelper.cone.material.opacity = 1
-                    }
                 }
 
             })
+
+            function onMouseWheel(event) {
+
+                // zoom out
+                if(event.wheelDelta>0){
+
+                    for(let i = 0; i < sceneSpheres.length; i++){
+
+                        if(camera.position.z <= (sceneSpheres[i].position.z + sceneSpheres[i].geometry.boundingSphere.radius + 100))
+                            sceneSpheres[i].visible = false
+                        //console.log(object)
+                        console.log(sceneSpheres[i])
+                    }
+                }
+
+                // zoom out, but not through object
+                else if(event.wheelDelta < 0){
+
+                    for(let i = 0; i < sceneSpheres.length; i++){
+
+                        if(camera.position.z > (sceneSpheres[i].position.z + sceneSpheres[i].geometry.boundingSphere.radius + 100))
+                            sceneSpheres[i].visible = true
+                        //console.log(object)
+                        console.log()
+                    }
+                }
+
+            }
+
+            document.addEventListener( 'mousewheel', onMouseWheel, false );
+
+
+
 
 
             createPanels(response)
@@ -283,134 +342,134 @@ var planeTest;
             //window.addEventListener('mouseover', ohHover, false);
 
 
-            const containerSize = 2
-
-                const container = new ThreeMeshUI.Block({
-                    ref: "container",
-                    padding: 0.050 * containerSize,
-                    fontFamily: './Robot-mds.json',
-                    fontTexture: './Roboto-msdf.png',
-                    fontColor: new THREE.Color(0xffffff),
-                    backgroundOpacity: 1,
-                    offset: 5
-                });
-
-
-
-                container.position.set(400, 400, 100);
-                // container.rotation.x = -0.55;
-                scene.add(container);
-
-
-                const title = new ThreeMeshUI.Block({
-                    height: 8 * containerSize,
-                    width: 60 * containerSize,
-                    margin: 1.0 * containerSize,
-                    justifyContent: "center",
-                    fontSize: 3.6 * containerSize,
-                });
-
-                title.add(
-                    new ThreeMeshUI.Text({
-                        content: "spiny bush viper",
-                    })
-                );
-
-                container.add(title);
-
-                //
-
-                const leftSubBlock = new ThreeMeshUI.Block({
-                    height: 38 * containerSize,
-                    width: 40 * containerSize,
-                    margin: 1.00 * containerSize,
-                    padding: 0.50 * containerSize,
-                    alignContent: "left",
-                    justifyContent: "end",
-                    offset: 1.0* containerSize
-                });
-
-                const caption = new ThreeMeshUI.Block({
-                    height: 1.4 * containerSize,
-                    width: 7.4 * containerSize,
-                    alignContent: "center",
-                    justifyContent: "center",
-                });
-
-                caption.add(
-                    new ThreeMeshUI.Text({
-                        content: "Mind your fingers",
-                        fontSize: 0.8 * containerSize,
-                    })
-                );
-
-                leftSubBlock.add(caption);
-
-                //
-
-                const rightSubBlock = new ThreeMeshUI.Block({
-                    margin: 0.50 * containerSize,
-                });
-
-                const subSubBlock1 = new ThreeMeshUI.Block({
-                    height: 7.0 * containerSize,
-                    width: 10 * containerSize,
-                    margin: 0.50 * containerSize,
-                    padding: 0.4 * containerSize,
-                    fontSize: 1.2 * containerSize,
-                    justifyContent: "center",
-                    backgroundOpacity: 0,
-                }).add(
-                    new ThreeMeshUI.Text({
-                        content: "Known for its extremely keeled dorsal scales that give it a ",
-                    }),
-
-                    new ThreeMeshUI.Text({
-                        content: "bristly",
-                        fontColor: new THREE.Color(0x92e66c),
-                    }),
-
-                    new ThreeMeshUI.Text({
-                        content: " appearance.",
-                    })
-                );
-
-                const subSubBlock2 = new ThreeMeshUI.Block({
-                    height: 24.6 * containerSize,
-                    width: 16 * containerSize,
-                    margin: 0.2 * containerSize,
-                    padding: 0.4 * containerSize,
-                    fontSize: 1.10 * containerSize,
-                    alignContent: "left",
-                    backgroundOpacity: 0,
-                }).add(
-                    new ThreeMeshUI.Text({
-                        content:
-                            "The males of this species grow to maximum total length of 73 cm (29 in): body 58 cm (23 in), tail 15 cm (5.9 in). Females grow to a maximum total length of 58 cm (23 in). The males are surprisingly long and slender compared to the females.\nThe head has a short snout, more so in males than in females.\nThe eyes are large and surrounded by 9–16 circumorbital scales. The orbits (eyes) are separated by 7–9 scales.",
-                    })
-                );
-
-                rightSubBlock.add(subSubBlock1, subSubBlock2);
-
-                //
-
-                const contentContainer = new ThreeMeshUI.Block({
-                    contentDirection: "row",
-                    padding: 0.4 * containerSize,
-                    margin: 0.5 * containerSize,
-                    backgroundOpacity: 0,
-                });
-
-                contentContainer.add(leftSubBlock, rightSubBlock);
-                container.add(contentContainer);
-
-                //
-
-                new THREE.TextureLoader().load("spiny_bush_viper.jpg", (texture) => {
-                    leftSubBlock.set({
-                        backgroundTexture: texture,
-                    });
-                });
+            // const containerSize = 2
+            //
+            //     const container = new ThreeMeshUI.Block({
+            //         ref: "container",
+            //         padding: 0.050 * containerSize,
+            //         fontFamily: './Robot-mds.json',
+            //         fontTexture: './Roboto-msdf.png',
+            //         fontColor: new THREE.Color(0xffffff),
+            //         backgroundOpacity: 1,
+            //         offset: 5
+            //     });
+            //
+            //
+            //
+            //     container.position.set(400, 400, 100);
+            //     // container.rotation.x = -0.55;
+            //     scene.add(container);
+            //
+            //
+            //     const title = new ThreeMeshUI.Block({
+            //         height: 8 * containerSize,
+            //         width: 60 * containerSize,
+            //         margin: 1.0 * containerSize,
+            //         justifyContent: "center",
+            //         fontSize: 3.6 * containerSize,
+            //     });
+            //
+            //     title.add(
+            //         new ThreeMeshUI.Text({
+            //             content: "spiny bush viper",
+            //         })
+            //     );
+            //
+            //     container.add(title);
+            //
+            //     //
+            //
+            //     const leftSubBlock = new ThreeMeshUI.Block({
+            //         height: 38 * containerSize,
+            //         width: 40 * containerSize,
+            //         margin: 1.00 * containerSize,
+            //         padding: 0.50 * containerSize,
+            //         alignContent: "left",
+            //         justifyContent: "end",
+            //         offset: 1.0* containerSize
+            //     });
+            //
+            //     const caption = new ThreeMeshUI.Block({
+            //         height: 1.4 * containerSize,
+            //         width: 7.4 * containerSize,
+            //         alignContent: "center",
+            //         justifyContent: "center",
+            //     });
+            //
+            //     caption.add(
+            //         new ThreeMeshUI.Text({
+            //             content: "Mind your fingers",
+            //             fontSize: 0.8 * containerSize,
+            //         })
+            //     );
+            //
+            //     leftSubBlock.add(caption);
+            //
+            //     //
+            //
+            //     const rightSubBlock = new ThreeMeshUI.Block({
+            //         margin: 0.50 * containerSize,
+            //     });
+            //
+            //     const subSubBlock1 = new ThreeMeshUI.Block({
+            //         height: 7.0 * containerSize,
+            //         width: 10 * containerSize,
+            //         margin: 0.50 * containerSize,
+            //         padding: 0.4 * containerSize,
+            //         fontSize: 1.2 * containerSize,
+            //         justifyContent: "center",
+            //         backgroundOpacity: 0,
+            //     }).add(
+            //         new ThreeMeshUI.Text({
+            //             content: "Known for its extremely keeled dorsal scales that give it a ",
+            //         }),
+            //
+            //         new ThreeMeshUI.Text({
+            //             content: "bristly",
+            //             fontColor: new THREE.Color(0x92e66c),
+            //         }),
+            //
+            //         new ThreeMeshUI.Text({
+            //             content: " appearance.",
+            //         })
+            //     );
+            //
+            //     const subSubBlock2 = new ThreeMeshUI.Block({
+            //         height: 24.6 * containerSize,
+            //         width: 16 * containerSize,
+            //         margin: 0.2 * containerSize,
+            //         padding: 0.4 * containerSize,
+            //         fontSize: 1.10 * containerSize,
+            //         alignContent: "left",
+            //         backgroundOpacity: 0,
+            //     }).add(
+            //         new ThreeMeshUI.Text({
+            //             content:
+            //                 "The males of this species grow to maximum total length of 73 cm (29 in): body 58 cm (23 in), tail 15 cm (5.9 in). Females grow to a maximum total length of 58 cm (23 in). The males are surprisingly long and slender compared to the females.\nThe head has a short snout, more so in males than in females.\nThe eyes are large and surrounded by 9–16 circumorbital scales. The orbits (eyes) are separated by 7–9 scales.",
+            //         })
+            //     );
+            //
+            //     rightSubBlock.add(subSubBlock1, subSubBlock2);
+            //
+            //     //
+            //
+            //     const contentContainer = new ThreeMeshUI.Block({
+            //         contentDirection: "row",
+            //         padding: 0.4 * containerSize,
+            //         margin: 0.5 * containerSize,
+            //         backgroundOpacity: 0,
+            //     });
+            //
+            //     contentContainer.add(leftSubBlock, rightSubBlock);
+            //     container.add(contentContainer);
+            //
+            //     //
+            //
+            //     new THREE.TextureLoader().load("spiny_bush_viper.jpg", (texture) => {
+            //         leftSubBlock.set({
+            //             backgroundTexture: texture,
+            //         });
+            //     });
 
 
 
@@ -441,10 +500,104 @@ var planeTest;
 
 
 
+
+
             scene.add( sphere );
 
 
 
+            let sceneSpheres = [];
+
+                //scene.add( clusterSphere );
+
+
+                let envmaploader = new THREE.PMREMGenerator(renderer);
+                let clusterSphere;
+                let instance;
+                //renderer.outputEncoding = THREE.sRGBEncoding
+                new RGBELoader().load("./cayley_interior_4k.hdr", function (hdrmap) {
+
+                    let envmap = envmaploader.fromCubemap(hdrmap);
+                    let texture2 = new THREE.CanvasTexture(new FlakesTexture())
+                    texture2.wrapS = THREE.RepeatWrapping;
+                    texture2.wrapT = THREE.RepeatWrapping;
+                    texture2.repeat.x = 10;
+                    texture2.repeat.y = 6;
+
+                    const ballMaterial = {
+                        clearcoat: 1.0,
+                        cleacoatRoughness: 0.1,
+                        metalness: 0.9,
+                        roughness: 0.5,
+                        color: 0xffffff,
+                        normalMap: texture2,
+                        transparent: true,
+                        normalScale: new THREE.Vector2(0.15, 0.15),
+                        envMap: envmap.texture
+                    }
+
+
+
+
+
+
+
+                    for(let i = 0; i < response.data.clustersPoints.length; i+= 6){
+                        const clusterPoints = response.data.clustersPoints
+                        const midwayPoints = new THREE.Vector3((((clusterPoints[i+1] - clusterPoints[i])) * 400) / 2, (((clusterPoints[i+3] - clusterPoints[i+2])) * 400) / 2, (((clusterPoints[i+5] - clusterPoints[i+4]) * 100) / 2))
+                        const sphereCenter = new THREE.Vector3(((((clusterPoints[i+1] - clusterPoints[i]) / 2) + clusterPoints[i]) * 400), ((((clusterPoints[i+3] - clusterPoints[i+2]) / 2) + clusterPoints[i+2]) * 400), ((((clusterPoints[i+5] - clusterPoints[i+4]) / 2) + clusterPoints[i+4]) * 100));
+                        const sphereRadius = Math.sqrt((midwayPoints.x ** 2) + (midwayPoints.y ** 2) + (midwayPoints.z ** 2))
+                        console.log("este é o raio da esfera")
+                        console.log(sphereRadius)
+                        console.log("este é o centro da esfera")
+                        console.log(sphereCenter)
+
+                        clusterSphere = new THREE.Mesh(new THREE.SphereGeometry(sphereRadius, 50, 500),
+                            new THREE.MeshBasicMaterial({
+                                transparent: true,
+                                opacity: 1.0,
+                                map: new THREE.TextureLoader().load('./news.jpg')
+                            }))
+
+                        clusterSphere.position.set(sphereCenter.x, sphereCenter.y, sphereCenter.z)
+                        console.log("entrei neste for que me esta a irritar eae")
+                        let ballGeo = new THREE.SphereGeometry(sphereRadius, 64, 64)
+                        let ballMat = new THREE.MeshPhysicalMaterial(ballMaterial)
+                        let ballMesh = new THREE.Mesh(ballGeo, ballMat)
+                        ballMesh.position.set(clusterSphere.position.x, clusterSphere.position.y, clusterSphere.position.z);
+                        ballMesh.material.opacity = 0.2
+
+                        let instance = new TextSprite({
+                            alignment: 'center',
+                            color: '#db4035',
+                            fontFamily: '"Times New Roman", Times, serif',
+                            fontSize: 20,
+                            fontWeight: "900",
+                            fontStyle: 'areal',
+                            text: [
+                                'Cats',
+
+
+                            ].join('\n'),
+                        });
+
+                        instance.position.set(sphereCenter.x,sphereCenter.y + sphereRadius + 10, sphereCenter.z)
+                        console.log(instance)
+                        console.log(instance.scale)
+                        scene.add(instance)
+                        scene.add(ballMesh)
+                        sceneSpheres.push(ballMesh)
+                    }
+
+
+                    console.log("esta é a clustersphere")
+                    // eslint-disable-next-line no-unused-expressions
+
+
+                })
+
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.25;
 
             // const container = new ThreeMeshUI.Block({
             //     height: 75,
@@ -526,7 +679,7 @@ var planeTest;
             //         //Obter a source da imagem do object clickado
             // }
 
-            function flyToPanel(clickedPlanePosition) {
+            function flyToObject(clickedObject) {
                 // get a new camera to reset .up and .quaternion on this.camera
 
                 //camera.position.set(0,0,900)
@@ -546,17 +699,14 @@ var planeTest;
                 //         }, 500)
                 //     //controls.update();
                 // }
-                console.log("entrei")
-                console.log(planeTest.position.x)
-                console.log(planeTest.position.y)
-                console.log(camera.position)
+                // console.log("entrei")
+                // console.log(planeTest.position.x)
+                // console.log(planeTest.position.y)
+                // console.log(camera.position)
 
                 var quaternion = controls.quaternion0
 
-
-
-
-
+                var objectPosition = clickedObject.position
 
                 var camera2 = new THREE.PerspectiveCamera(
                     50,
@@ -573,8 +723,20 @@ var planeTest;
 
 
 
-                controls.target.set(clickedPlanePosition.x, clickedPlanePosition.y, clickedPlanePosition.z + 10)
-                var position = { x : clickedPlanePosition.x, y: clickedPlanePosition.y };
+                if(clickedObject.geometry.type === 'PlaneGeometry')
+                controls.target.set(objectPosition.x, objectPosition.y, objectPosition.z + 10)
+                else if(clickedObject.geometry.type === 'SphereGeometry'){
+                    const sphereRadius = clickedObject.geometry.boundingSphere.radius
+                    controls.target.set(objectPosition.x, objectPosition.y, objectPosition.z + sphereRadius + 100)
+
+                }
+
+
+
+                console.log(clickedObject)
+                console.log("este é o clickedpanel")
+
+                var position = { x : objectPosition.x, y: objectPosition.y };
                 var target = { x : 0, y: 0 };
                 //console.log("entrei no tween")
 
@@ -588,9 +750,9 @@ var planeTest;
                    time++;
                    var deg = time / (60); // scale time 0:1
                    THREE.Quaternion.slerp(q0, camera2.quaternion, camera.quaternion, deg);
-                   console.log(camera.position)
+                   //console.log(camera.position)
                     lastPosition = camera.position
-                    console.log(lastPosition)
+                    // console.log(lastPosition)
 
 
                     //console.log("entrei no update")
@@ -615,6 +777,8 @@ var planeTest;
                      camera.quaternion.set(q.x, q.y, q.z, q.w);
                          controls.target = new THREE.Vector3(c.x, c.y, zMin);
                          controls.update();
+                         if(clickedObject.geometry.type === 'SphereGeometry')
+                            clickedObject.visible = false
                      //camera.position.set(0, 0 ,1000)
                     // camera.translateX(controls.target.x)
                     // camera.translateY(controls.target.y)
@@ -686,7 +850,7 @@ var planeTest;
 
             function defineTrackballControlsSettings(){
 
-                controls.zoomSpeed = 0.7;
+                controls.zoomSpeed = 0.3;
                 controls.panSpeed = 0.4;
                 controls.enableDamping = true;
                 controls.dampingFactor = 0.07;
@@ -750,7 +914,34 @@ var planeTest;
     },[])
 
     return(
-        <div ref={ref} style={{width: '100px', height: '100px', zIndex: '100', position:'absolute', marginLeft: '265px', marginTop: '-23px'}}/>
+        <>
+
+        <div ref={ref} style={{width: '100px', height: '100px', zIndex: '100', position:'relative', marginLeft: '265px', marginTop: '-23px'}}>
+            <div id="overlay">
+                <Card border="secondary" key={1}  style={{width: '220px', marginTop: '15px', marginLeft: '15px'}}>
+                    <Carousel nextLabel='none' nextIcon= '' prevIcon='' style={{borderRadius: '50%'}} interval={null}>
+                            <Carousel.Item style={{width:'220px', height:'165px'}}  >
+                                <img
+                                     style={{width:'220px', height:'165px', objectFit: "cover", overflow: "hidden"}}
+                                     className="d-block w-100"
+                                     src={clickedImage}
+                                     alt="First slide"
+                                />
+                            </Carousel.Item>)}
+                    </Carousel>
+
+                    <Card.Body >
+                        <Card.Title  > {1}. {"Ronaldo’s 3 Goals Carry Portugal to World Cup Berth"}</Card.Title>
+                        <Card.Subtitle className="mb-2 text-muted">{"2013-11-20"}</Card.Subtitle>
+                        <Card.Text style={{fontFamily: "unset", fontSize: "0.75em"}}>
+                            {"A second-half hat trick by Cristiano Ronaldo took Portugal to the World Cup finals with a 4-2 aggregate victory in its World Cup playoff against Sweden on Tuesday...."}
+                        </Card.Text>
+                        <Card.Link style={{fontFamily: "arial", fontSize: "0.75em", float:"right"}} variant="primary" href={"pre"}>See more</Card.Link>
+                    </Card.Body>
+                </Card>
+            </div>
+        </div>
+        </>
     )
 
 }
