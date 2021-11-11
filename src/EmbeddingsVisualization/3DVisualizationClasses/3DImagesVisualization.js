@@ -14,10 +14,11 @@ import {FlakesTexture} from "three/examples/jsm/textures/FlakesTexture";
 import {RGBELoader} from "three/examples/jsm/loaders/RGBELoader";
 
 
+
 export const ThreeDImageVisualization = (filteredNews) => {
 
     const ref = useRef();
-    const [clickedImage, setClickedImage] = useState("https://www.plataformamedia.com/wp-content/uploads/2020/09/dwayne.jpg")
+    const [clickedImage, setClickedImage] = useState("transferir.png")
 
     useEffect(()=>{
 

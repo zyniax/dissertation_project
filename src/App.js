@@ -17,6 +17,7 @@ import {Card, Col, Row, ListGroup} from "react-bootstrap";
 import Embedding_visualization from "./EmbeddingsVisualization/2DVisualizationTest";
 import ThreeDImageVisualization from "./EmbeddingsVisualization/3DVisualizationClasses/3DImagesVisualization";
 import HorizontalBarChart from "./LineChart/HorizontalBarChart/HorizontalBarChart";
+import Test from "./test/test"
 import Graph_visualization2 from "./GraphVisualization/GraphVisualization2";
 
 
@@ -96,15 +97,13 @@ function App() {
           </div>
 
 
+          <Test/>
 
-
-          <Graph_visualization/>
         <Manual_cropper image={image}/>
 
         <ThreeDWorldVisualization setFilteredNews={setFilteredNews}/>
 
         <ThreeDImageVisualization filteredNews={filteredNews}/>
-
 
 
       </>
