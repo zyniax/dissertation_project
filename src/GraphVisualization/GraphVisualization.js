@@ -1,8 +1,7 @@
-import {Sigma, RandomizeNodePositions, RelativeSize, SigmaEnableSVG  } from 'react-sigma';
 import React, {useEffect, useRef, useState} from "react";
 import "./GraphVisualization.css"
 import * as d3 from 'd3';
-import data from "bootstrap/js/src/dom/data";
+
 
 
 

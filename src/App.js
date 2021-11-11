@@ -1,24 +1,17 @@
-import logo from './logo.svg';
 import Line_chart from "./LineChart/LineChart";
 import NewsSearch from "./NewsSearch/NewsSearch";
 import './App.css';
-import {Background} from "./BackgroundVisualization";
 import SearchBars from "./SearchBars/SearchBars";
 import Manual_cropper from "./ManualCroppingImage/ManualCroppingImage";
-import Tooltip from "./Tooltip/Tooltip";
 import ThreeDWorldVisualization from "./3DWorldVisualization/ThreeDWorldVisualization";
-import Graph_visualization from "./GraphVisualization/GraphVisualization";
 import React, {useEffect, useState} from "react";
 import NavBar from './Navbar Components/Navbar'
 import {BrowserRouter as Router} from 'react-router-dom'
 import RelevantHeadlines from "./LineChart/RelevantHeadlines/RelevantHeadlines";
-import Chart_Pie from "./LineChart/ChartPie/ChartPie";
 import {Card, Col, Row, ListGroup} from "react-bootstrap";
-import Embedding_visualization from "./EmbeddingsVisualization/2DVisualizationTest";
 import ThreeDImageVisualization from "./EmbeddingsVisualization/3DVisualizationClasses/3DImagesVisualization";
 import HorizontalBarChart from "./LineChart/HorizontalBarChart/HorizontalBarChart";
 import Test from "./test/test"
-import Graph_visualization2 from "./GraphVisualization/GraphVisualization2";
 
 
 function App() {
