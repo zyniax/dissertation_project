@@ -28,7 +28,7 @@ const RelevantHeadlines = ({brushExtent}) => (
 
 
 
-    <div style={{fontStyle: "unset", marginLeft:"1300px", marginTop: "-50px"}}>
+    <div style={{fontStyle: "unset", marginTop: "20px"}}>
 
         <Card style={{ width: '20em' }}>
             <Card.Header>Relevant headlines from <b>{brushExtent[0]}</b> to <b>{brushExtent[1]}</b></Card.Header>

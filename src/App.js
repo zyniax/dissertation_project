@@ -18,6 +18,7 @@ function App() {
     const [image, setImageSrc] = useState("");
     const [brushExtent, setBrushExtent] = useState([]);
     const [filteredNews, setFilteredNews] = useState([]);
+    const [threeDImageData, setThreeDImageData] = useState([]);
     const [keywords, setKeywords] = useState([]);
 
 
@@ -60,20 +61,21 @@ function App() {
 
 
           <div className="SearchBarsDiv" style={{marginBottom: "10px", marginTop: "20px"}}>
-              <SearchBars setFilteredNews={setFilteredNews} setKeywords={setKeywords} />
+              <SearchBars setFilteredNews={setFilteredNews} setKeywords={setKeywords} setThreeDImageData={setThreeDImageData} />
           </div>
 
 
 
-          <div style={{width: "90%", overflow: "hidden " , marginTop: "60px", height: "100%", marginLeft: "220px" }}>
+          <div style={{width: "90%", overflow: "hidden " , marginTop: "60px", height: "100%", marginLeft: "20px" }}>
 
 
 
             <Card border="light">
               <div style={{float:"left", marginBottom: '100px'}}>
-                  <Line_chart setBrushExtent={setBrushExtent} style={{float:"left"}} setFilteredNews={setFilteredNews} filteredNews={filteredNews}  />
+
+                      <Line_chart setBrushExtent={setBrushExtent} style={{float:"left"}} setFilteredNews={setFilteredNews} filteredNews={filteredNews} brushExtent={brushExtent}  />
+
                   <HorizontalBarChart keywords={keywords} filteredNews={filteredNews} setFilteredNews={setFilteredNews}/>
-                  <RelevantHeadlines brushExtent={brushExtent} />
 
               </div>
 
@@ -87,7 +89,7 @@ function App() {
                   <NewsSearch filteredNews={filteredNews} setImageSrc={setImageSrc} />
               </div>
               </Card>
-          </div>
+
 
 
           <Test/>
@@ -96,8 +98,9 @@ function App() {
 
         <ThreeDWorldVisualization setFilteredNews={setFilteredNews}/>
 
-        <ThreeDImageVisualization filteredNews={filteredNews}/>
+        <ThreeDImageVisualization threeDImageData={threeDImageData} filteredNews={filteredNews}/>
 
+          </div>
 
       </>
 

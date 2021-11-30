@@ -281,8 +281,8 @@ export const Test = ({setBrushExtent}) => {
 
 
 
-        const width = 1000,
-            height = 1000;
+        const width = 910,
+            height = 800;
 
         let i = 0;
 
@@ -372,7 +372,7 @@ export const Test = ({setBrushExtent}) => {
                 .style("pointer-events", "none")
                 .attr('class', 'edgelabel')
                 .attr('id', function (d, i) {return 'edgelabel' + i})
-                .attr('font-size', 10)
+                .attr('font-size', 14)
                 .attr('fill', '#aaa');
 
             edgelabels.append('textPath') //To render text along the shape of a <path>, enclose the text in a <textPath> element that has an href attribute with a reference to the <path> element.
@@ -408,7 +408,7 @@ export const Test = ({setBrushExtent}) => {
                     .on('end', dragended))
 
             nodeEnter.append('circle')
-                .attr("r", 25)
+                .attr("r", 35)
                 .style('text-anchor', function(d){ return d.children ? 'end' : 'start'; })
                 .text(function(d){ return d.data.name })
 

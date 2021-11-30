@@ -4,7 +4,7 @@ import './SearchBars.css'
 import {useEffect, useState} from "react";
 
 
-const SearchBars = ({image, setFilteredNews, setKeywords}) => {
+const SearchBars = ({image, setFilteredNews, setKeywords, setThreeDImageData}) => {
 
     const [searchTerm, setSearchTerm] = useState("")
 
@@ -47,6 +47,7 @@ const handleMouseClickRequest = () => {
         console.log(response.data)
         setFilteredNews(response.data.searchWordResult.body.hits.hits)
         setKeywords(response.data.keywords)
+        setThreeDImageData(response.data)
         console.log("oyeahyeah")
         console.log(response.data.searchWordResult.body.hits.hits)
         console.log(response.data.keywords)
@@ -61,12 +62,12 @@ const handleMouseClickRequest = () => {
     <>
 
         <section className="webdesigntuts-workshop">
-            {/*<form>*/}
+            <form>
                 <input type="search" placeholder="What are you looking for?" onChange={(event) => {setSearchTerm(event.target.value)}}/>
                 <button onClick={() => {handleMouseClickRequest()}}>Search</button>
 
 
-            {/*</form>*/}
+            </form>
         </section>
 
 

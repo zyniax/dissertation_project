@@ -101,7 +101,7 @@ export const HorizontalBarChart = ({keywords, filteredNews, setFilteredNews}) =>
 
     return (
 
-        <div style={{marginLeft: '-20px', marginTop: '650px'}} ref={svgRef}/>
+        <div style={{marginLeft: '-20px'}} ref={svgRef}/>
     );
 }
 export default HorizontalBarChart;

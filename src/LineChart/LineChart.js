@@ -5,6 +5,7 @@ import {Card, Col, Row, Carousel, Container} from "react-bootstrap";
 import HorizontalBarChart from "./HorizontalBarChart/HorizontalBarChart";
 
 import * as d3 from 'd3';
+import RelevantHeadlines from "./RelevantHeadlines/RelevantHeadlines";
 
 
 var dataset1 = [
@@ -28,7 +29,7 @@ var dataset1 = [
 
 
 
-export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews}) => {
+export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brushExtent}) => {
 
     const [stateNumberOfDatesBetweenTheStartingAndEndDate, setnumberOfDatesBetweenTheStartingAndEndDate] = useState(dataset1.length);
     const [arrayLenght, getArrayLength] = useState();
@@ -39,8 +40,8 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews}) => {
 
 
         // set the dimensions and margins of the graph
-        const margin = {top: 10, right: 30, bottom: 30, left: 60},
-            width = 1300 - margin.left - margin.right,
+        const margin = {top: 10, right: 30, bottom: 30, left: 25},
+            width = 1000 - margin.left - margin.right,
             height = 600 - margin.top - margin.bottom;
 
 
@@ -497,9 +498,9 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews}) => {
 
     return (
 
-        <div id='linechart' style={{ width: "800px", height: "100px", marginBottom: "100px"}}>
-            <Container style={{ marginLeft: "80px"}}>
-                <Row>
+        <div id='linechart'>
+            <Container style={{ marginLeft: "10px"}}>
+                <Row style={{width: "60%"}}>
                     <Col >
                         <Card style={{ width: '20rem' }}>
                             <Card.Body style={{height:'120px'}}>
@@ -510,7 +511,7 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews}) => {
                                     </il>
                                     <il  >
 
-                                        <span style={{fontSize: '24px', marginLeft: '160px', fontWeight: '350', color:'#1072b8'}}>{arrayLenght}</span>
+                                        <span style={{fontSize: '24px', marginLeft: '80px', fontWeight: '350', color:'#1072b8'}}>{arrayLenght}</span>
                                     </il>
                                 </ul>
                             </Card.Body>
@@ -535,7 +536,11 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews}) => {
                 </Row>
             </Container>
 
-            <svg style={{marginTop: "10px"}} ref={svgRef}/>
+            <div style={{display:"flex"}}>
+                <svg style={{marginTop: "10px"}} ref={svgRef}/>
+                <RelevantHeadlines brushExtent={brushExtent} />
+            </div>
+
         </div>
     );
 }

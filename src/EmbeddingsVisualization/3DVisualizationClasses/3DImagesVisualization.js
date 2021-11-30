@@ -12,28 +12,51 @@ import TextSprite from '@seregpie/three.text-sprite';
 import {Card, Carousel} from "react-bootstrap";
 import {FlakesTexture} from "three/examples/jsm/textures/FlakesTexture";
 import {RGBELoader} from "three/examples/jsm/loaders/RGBELoader";
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 
 
-export const ThreeDImageVisualization = (filteredNews) => {
+export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
 
     const ref = useRef();
-    const [clickedImage, setClickedImage] = useState("transferir.png")
+    let imageIndex = 0
+    const [clickedImage, setClickedImage] = useState("")
+
+    console.log("filterednews da imagem 3d")
+    console.log(filteredNews[0])
+
+    let sceneSpheres = [];
+    let additionalSphereKeywords = [];
+    let lastIntersectedSpheres = []
+    let createdPlanes = []
+    const widthMultiplier = 600
+    const heightMultiplier = 600
+    const depthMultiplier = 100
+
+
 
     useEffect(()=>{
 
-        axios.get('http://localhost:3000/api/request/umap3D',{
-            headers: {
-                'Access-Control-Allow-Origin': 'http://localhost:3000',
-                'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
-                'Access-Control-Allow-Headers': 'application/json'
-            }
-        }).then(response => {
+        console.log("wste é o threedimage data")
+        console.log(threeDImageData)
+
+        if(threeDImageData.length != 0){
+
+
+
+            const response = threeDImageData
+        // axios.get('http://localhost:3000/api/request/umap3D',{
+        //     headers: {
+        //         'Access-Control-Allow-Origin': 'http://localhost:3000',
+        //         'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+        //         'Access-Control-Allow-Headers': 'application/json'
+        //     }
+        // }).then(response => {
 
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(
                 50,
-                window.innerWidth / window.innerHeight,
+                1200 / 900,
                 0.1,
                 1000
             )
@@ -45,14 +68,14 @@ export const ThreeDImageVisualization = (filteredNews) => {
                 }
             )
 
-            renderer.setSize(window.innerWidth, window.innerHeight)
+            renderer.setSize(1200, 900)
             renderer.setPixelRatio(window.devicePixelRatio)
             document.body.appendChild((renderer.domElement))
             ref.current.appendChild(renderer.domElement);
 
             //Create a new ambient light
-            var light = new THREE.AmbientLight( 0x888888,  )
-            scene.add( light )
+            var light = new THREE.AmbientLight( 0x404040 ); // soft white light
+            scene.add( light );
 
 //Create a new directional light
             var light = new THREE.DirectionalLight( 0xfdfcf0, 0.2 )
@@ -97,33 +120,45 @@ export const ThreeDImageVisualization = (filteredNews) => {
 
 // immediately use the texture for material creation
 
-var planeTest;
+            var planeTest;
 
             function createPanels(response){
                 console.log(response)
 
-                for(var i = 0; i < response.data.embeddings.length; i++){
+                for(var i = 0; i < threeDImageData.embeddings.length; i++){
                     const texture = new THREE.TextureLoader().load('https://large.novasearch.org/nytimes/images/206cd0c3321f129171d53aca579372662e99b8f946c01d27c42e10a8daf42f47.jpg');
-                    const geometry = new THREE.PlaneGeometry(2, 2, 1);
+
+                    texture.magFilter = THREE.LinearFilter;
+                    texture.minFilter = THREE.LinearFilter;
+
+                    const geometry = new THREE.PlaneGeometry(4, 4, 1);
                     const material = new THREE.MeshBasicMaterial({map: texture});
+
                     const plane= new THREE.Mesh(geometry, material);
+                    //texture.minFilter = THREE.NearestFilter
+                    //texture.magFilter = THREE.NearestFilter
                     planeTest = plane
-
-
-
-                    // if(response.data[i][2] > 0 && response.data[i][2] < 0.325){
-                    //     response.data[i][2] = 0
-                    // }
-                    // else if(response.data[i][2] >= 0.325 && response.data[i][2] < 0.650){
-                    //     response.data[i][2] = 10
-                    // }
-                    // else if (response.data[i][2] >= 0.650){
-                    //     response.data[i][2] = 20
-                    // }
-
-                    plane.position.set(response.data.embeddings[i][0] * 400, response.data.embeddings[i][1]*400, response.data.embeddings[i][2] * 100)
+                    plane.position.set(threeDImageData.embeddings[i][0] * widthMultiplier, threeDImageData.embeddings[i][1]*heightMultiplier, threeDImageData.embeddings[i][2] * depthMultiplier)
                     scene.add(plane)
                 }
+
+            }
+
+            function createSmallPoints(response){
+                console.log(response)
+
+                for(var i = 0; i < threeDImageData.embeddings.length; i++){
+                    //const texture = new THREE.TextureLoader().load('https://large.novasearch.org/nytimes/images/206cd0c3321f129171d53aca579372662e99b8f946c01d27c42e10a8daf42f47.jpg');
+                    const geometry = new THREE.SphereGeometry(2, 100, 1);
+                    const material = new THREE.MeshBasicMaterial({color: "white"});
+                    const smallSphere = new THREE.Mesh(geometry, material);
+                    smallSphere.position.set(threeDImageData.embeddings[i][0] * widthMultiplier, threeDImageData.embeddings[i][1]*heightMultiplier, threeDImageData.embeddings[i][2] * depthMultiplier)
+                    scene.add(smallSphere)
+                }
+
+            }
+
+            function replaceSmallPointsForPanels(){
 
             }
 
@@ -132,7 +167,7 @@ var planeTest;
 
                 for ( const item of selectionBox.collection ) {
 
-                   // item.material.color.set( 0xffffff );
+                    // item.material.color.set( 0xffffff );
 
                 }
 
@@ -225,22 +260,73 @@ var planeTest;
 
                 raycaster.setFromCamera( mouse, camera );
                 const intersects = raycaster.intersectObjects(scene.children, true);
-                var currentIntersection = null;
+                let currentObject = null;
+
 
 
                 if (intersects.length > 0) {
-                    currentIntersection = intersects[0].object;
-                    arrowHelper.cone.material.opacity = 0
+                    currentObject = intersects[0].object;
+                    //arrowHelper.cone.material.opacity = 0
 
-                    if (intersects[0].object.geometry.type === 'PlaneGeometry')
-                        setClickedImage("https://www.palpitedigital.com/y/5327/imagens-google-e1604596848141.jpg")
+                    if (intersects[0].object.geometry.type === 'PlaneGeometry'){
+                        //console.log(intersects[0] + "    " + threeDImageData.newsIds.length)
+                        const indexOfImage = intersects[0].object.indexOfImage
+                        const newsIdAndImagePosition =  threeDImageData.newsIds[indexOfImage]
 
-                    if (intersects[0].object.geometry.type === 'SphereGeometry')
-                        setClickedImage("https://www.palpitedigital.com/y/5327/imagens-google-e1604596848141.jpg")
+                        const newsId = newsIdAndImagePosition.split("_")[0]
+                         imageIndex = newsIdAndImagePosition.split("_")[1]
+                        console.log("este é o imageIndex")
+                        console.log(imageIndex)
+
+                        const news = threeDImageData.searchWordResult.body.hits.hits
+
+                        for(let l = 0; l < news.length; l++){
+                                if(news[l]._id == newsId){
+                                    let newsImageAndIndex = []
+                                    newsImageAndIndex[0] = news[l]
+                                    newsImageAndIndex[1] = imageIndex
+                                    setClickedImage(newsImageAndIndex)
+                                    console.log("true")
+                                    console.log(news[l])
+                                    console.log(newsImageAndIndex)
+                                }
+
+                        }
+                    }
+
+                        //setClickedImage("https://www.palpitedigital.com/y/5327/imagens-google-e1604596848141.jpg")
+
+                    if (intersects[0].object.geometry.type === 'SphereGeometry'){
+                        const newsLinks = ["https://madre.com.pt/wp-content/uploads/2021/07/IMG_8004-scaled.jpg", "https://www.jcs.pt/upload/1457541812.jpg", "https://www.fccnn.com/news/article769232.ece/alternates/BASE_LANDSCAPE/2222824%2Bfire.jpg", "https://wwmt.com/resources/media2/16x9/full/1015/center/80/7d7ef12f-5b4b-450c-af92-bd5a341a649e-large16x9_FIREGENERIC.png"]
+
+                        const random = Math.floor(Math.random() * newsLinks.length);
+                        //setClickedImage(newsLinks[random])
+
+                        lastIntersectedSpheres.push(intersects[0].object);
+
+                        const sphere = intersects[0].object;
+                        const spherePosition = intersects[0].object.position;
+                        const sphereRadius = intersects[0].object.geometry.parameters.radius;
+
+                        if(!sphere.hasKeywords){
+                            addAdditionalKeywordsToSpheres(sphere, spherePosition, sphereRadius)
+                        }
+
+
+
+                    }
+
 
                 } else {
-                    if (currentIntersection === null)
-                        arrowHelper.cone.material.opacity = 1
+                    if (currentObject === null){
+                        //arrowHelper.cone.material.opacity = 1
+                        if(lastIntersectedSpheres.length != 0){
+                            removeAdditionalKeywordsInSpheres();
+//
+                        }
+
+                    }
+
                 }
 
             })
@@ -252,26 +338,171 @@ var planeTest;
 
                     for(let i = 0; i < sceneSpheres.length; i++){
 
-                        if(camera.position.z <= (sceneSpheres[i].position.z + sceneSpheres[i].geometry.boundingSphere.radius + 100))
-                            sceneSpheres[i].visible = false
-                        //console.log(object)
-                        console.log(sceneSpheres[i])
+                        if(sceneSpheres[i].visible == true && camera.position.z <= (sceneSpheres[i].position.z + sceneSpheres[i].geometry.boundingSphere.radius + 100) && (camera.position.x + updatedInitialWidthFov/2 > sceneSpheres[i].position.x - sceneSpheres[i].geometry.boundingSphere.radius && camera.position.x - updatedInitialWidthFov/2 < sceneSpheres[i].position.x + sceneSpheres[i].geometry.boundingSphere.radius) && (camera.position.y + updatedHeightFov/2 > sceneSpheres[i].position.y + sceneSpheres[i].geometry.boundingSphere.radius && camera.position.y - updatedInitialWidthFov/2 < sceneSpheres[i].position.y - sceneSpheres[i].geometry.boundingSphere.radius) ){
+
+
+                                const indexesOfImagesInsideSphere = sceneSpheres[i].pointsIndexes
+                                createPanelsOfCluster(indexesOfImagesInsideSphere, i)
+                                sceneSpheres[i].visible = false
+                                console.log(sceneSpheres[i].pointsIndexes)
+
+
+                            //console.log(object)
+                            //console.log(sceneSpheres[i])
+                        }
+                        if(sceneSpheres[i].visible == false){
+
+                            const indexesOfImagesInsideSphere = sceneSpheres[i].pointsIndexes
+
+
+                            for(let j = 0; j < indexesOfImagesInsideSphere.length; j++) {
+
+                                console.log(threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2])
+                                console.log(threeDImageData.embeddings[indexesOfImagesInsideSphere])
+                                if(camera.position.z - (threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier) < 15 && createdPlanes[i][j].showingHighQualityImage == false ){
+
+
+
+                                console.log("llllllllllllllllllllllllllll entrei no high")
+
+
+
+                                        const geometry = new THREE.PlaneGeometry(4, 4, 1);
+                                        const texture = new THREE.TextureLoader().load('./pre_highQuality/transferir.jpg');
+                                        //const texture = new THREE.CanvasTexture(imageBitmap);
+
+
+
+                                        // texture.magFilter = THREE.LinearFilter;
+                                        // texture.minFilter = THREE.LinearFilter;
+                                        // texture.needsUpdate = true;
+
+                                        const material = new THREE.MeshBasicMaterial({map: texture});
+                                        const plane = new THREE.Mesh(geometry, material);
+
+                                        plane.showingBadQualityImage = true
+                                        plane.showingMediumQualityImage = true
+                                        plane.showingHighQualityImage = true
+                                        plane.indexOfImage = j
+
+                                        planeTest = plane
+                                        plane.position.set(threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][0] * widthMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][1] * heightMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier)
+                                        //plane.position.set(Math.random()* 400, Math.random() * 400, Math.random() * 100)
+                                        const planeMesh = createdPlanes[i][j]
+                                        //console.log(planeMesh)
+                                        planeMesh.geometry.dispose();
+                                        planeMesh.material.dispose();
+                                        texture.dispose();
+                                        scene.remove(planeMesh);
+
+                                        createdPlanes[i][j] = plane
+                                        scene.add(plane)
+
+                                    console.log("pre3")
+                                }
+                                 if(camera.position.z - (threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier) < 35 && createdPlanes[i][j].showingMediumQualityImage == false  && createdPlanes[i][j].showingHighQualityImage == false){
+
+
+                                    console.log("kkkkkkkkkkkkkkkkkkkkkkk entrei no medium")
+
+
+                                    const planeMesh = createdPlanes[i][j]
+                                    planeMesh.geometry.dispose();
+                                    planeMesh.material.dispose();
+                                    console.log("removi")
+                                    scene.remove(planeMesh);
+
+
+
+                                    const geometry = new THREE.PlaneGeometry(4, 4, 1);
+                                    const texture = new THREE.TextureLoader().load('./pre_mediumQuality/003d3159614e83d323610c2613bd93d21b1732affed6a642bc6338094a9c42cf-min.jpg');
+                                    //const texture = new THREE.CanvasTexture(imageBitmap);
+
+
+
+                                    // texture.magFilter = THREE.LinearFilter;
+                                    // texture.minFilter = THREE.LinearFilter;
+                                    // texture.needsUpdate = true;
+
+                                    const material = new THREE.MeshBasicMaterial({map: texture});
+                                    const plane = new THREE.Mesh(geometry, material);
+
+                                    plane.showingBadQualityImage = true
+                                    plane.showingMediumQualityImage = true
+                                    plane.showingHighQualityImage = false
+                                     plane.indexOfImage = j
+
+                                    planeTest = plane
+                                    plane.position.set(threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][0] * widthMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][1] * heightMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier)
+                                    //plane.position.set(Math.random()* 400, Math.random() * 400, Math.random() * 100)
+
+                                    createdPlanes[i][j] = plane
+
+                                    //console.log(planeMesh)
+
+
+
+                                    scene.add(plane)
+
+                                }
+                            }
+
+                        }
                     }
                 }
-
                 // zoom out, but not through object
                 else if(event.wheelDelta < 0){
 
                     for(let i = 0; i < sceneSpheres.length; i++){
 
-                        if(camera.position.z > (sceneSpheres[i].position.z + sceneSpheres[i].geometry.boundingSphere.radius + 100))
-                            sceneSpheres[i].visible = true
-                        //console.log(object)
-                        console.log()
+                        if(camera.position.z > (sceneSpheres[i].position.z + sceneSpheres[i].geometry.boundingSphere.radius + 100) || (camera.position.x + updatedInitialWidthFov/2 < sceneSpheres[i].position.x - sceneSpheres[i].geometry.boundingSphere.radius || camera.position.x - updatedInitialWidthFov/2 > sceneSpheres[i].position.x + sceneSpheres[i].geometry.boundingSphere.radius) || (camera.position.y + updatedHeightFov/2 < sceneSpheres[i].position.y - sceneSpheres[i].geometry.boundingSphere.radius || camera.position.y - updatedInitialWidthFov/2 > sceneSpheres[i].position.y + sceneSpheres[i].geometry.boundingSphere.radius) ){
+
+                            // const geometry = new THREE.SphereGeometry(2, 100, 1);
+                            // const material = new THREE.MeshBasicMaterial({color: "white"});
+                            // const smallSphere = new THREE.Mesh(geometry, material);
+                            // //smallSphere.position.set(sceneSpheres[i].position.x, sceneSpheres[i].position.y + sceneSpheres[i].geometry.boundingSphere.radius, sceneSpheres[i].position.z + sceneSpheres[i].geometry.boundingSphere.radius)
+                            // smallSphere.position.set(camera.position.x, camera.position.y + updatedHeightFov/2, sceneSpheres[i].z)
+                            // scene.add(smallSphere)
+
+                            if(sceneSpheres[i].visible == false){
+
+                                const indexesOfImagesInsideSphere = sceneSpheres[i].pointsIndexes
+                                console.log("entrei na parte das bolas brancas")
+                                console.log(sceneSpheres[i].pointsIndexes)
+
+                                for(let j = createdPlanes[i].length; j > 0; j--){
+                                    const planeMesh = createdPlanes[i].pop()
+                                    //console.log(planeMesh)
+                                    planeMesh.geometry.dispose();
+                                    planeMesh.material.dispose();
+                                    texture.dispose();
+                                    scene.remove(planeMesh);
+                                    //scene.dispose(createdPlanes.pop().geometry.dispose())
+                                    //scene.dispose(createdPlanes.pop().material.dispose())
+                                    //scene.remove(createdPlanes.pop())
+                                    //console.log(sceneChildrens[j])
+                                }
+
+                                // for(let i = 0; i < indexesOfImagesInsideSphere.length; i++){
+                                //     //const texture = new THREE.TextureLoader().load('https://large.novasearch.org/nytimes/images/206cd0c3321f129171d53aca579372662e99b8f946c01d27c42e10a8daf42f47.jpg');
+                                //     const geometry = new THREE.SphereGeometry(2, 100, 1);
+                                //     const material = new THREE.MeshBasicMaterial({color: "white"});
+                                //     const smallSphere = new THREE.Mesh(geometry, material);
+                                //     smallSphere.position.set(threeDImageData.embeddings[indexesOfImagesInsideSphere[i]][0] * widthMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[i]][1] * heightMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[i]][2] * depthMultiplier)
+                                //     scene.add(smallSphere)
+                                //
+                                // }
+                                sceneSpheres[i].visible = true
+
+
+
+                            }
+                        }
                     }
                 }
 
             }
+
 
             document.addEventListener( 'mousewheel', onMouseWheel, false );
 
@@ -279,8 +510,9 @@ var planeTest;
 
 
 
-            createPanels(response)
 
+            //createPanels(response)
+            //createSmallPoints(response)
 
             scene.background = new THREE.Color("#171717")
             const raycaster = new THREE.Raycaster();
@@ -313,7 +545,7 @@ var planeTest;
                     //Obter a source da imagem do object clickado
 
                     for( var i = scene.children.length - 1; i >= 0; i--) {
-                       var obj = scene.children[i];
+                        var obj = scene.children[i];
                         scene.remove(obj);
                     }
 
@@ -424,6 +656,64 @@ var planeTest;
             //         new ThreeMeshUI.Text({
             //             content: "Known for its extremely keeled dorsal scales that give it a ",
             //         }),
+
+            function getNewInstance(){
+                instance = new TextSprite({
+                    alignment: 'center',
+                    color: '#db4035',
+                    fontFamily: '"Times New Roman", Times, serif',
+                    fontSize: 20,
+                    fontWeight: "900",
+                    fontStyle: 'areal',
+                    text: [
+                        'Cats',
+
+
+                    ].join('\n'),
+                });
+                return instance
+            }
+
+
+            function addAdditionalKeywordsToSpheres(sphere, spherePosition, sphereRadius){
+                sphere.hasKeywords = true
+                instance = getNewInstance()
+                instance.position.set(spherePosition.x + sphereRadius + 25, spherePosition.y, spherePosition.z)
+                additionalSphereKeywords.push(instance)
+                scene.add(instance)
+
+
+
+                instance = getNewInstance()
+                instance.position.set(spherePosition.x - sphereRadius - 25, spherePosition.y, spherePosition.z)
+                additionalSphereKeywords.push(instance)
+                scene.add(instance)
+
+
+
+                getNewInstance()
+                instance.position.set(spherePosition.x, spherePosition.y - sphereRadius - 10, spherePosition.z)
+                additionalSphereKeywords.push(instance)
+                scene.add(instance)
+            }
+
+            function removeAdditionalKeywordsInSpheres(){
+
+                for(let i = 0; i < lastIntersectedSpheres.length; i++)
+                    lastIntersectedSpheres[i].hasKeywords = false
+
+                console.log("pre1")
+                lastIntersectedSpheres = []
+
+
+                for(let i = 0 ; i < additionalSphereKeywords.length; i++)
+                    scene.remove(additionalSphereKeywords[i])
+
+
+                console.log("pre2")
+                additionalSphereKeywords = []
+
+            }
             //
             //         new ThreeMeshUI.Text({
             //             content: "bristly",
@@ -480,9 +770,9 @@ var planeTest;
 
 
 
-            const dir = new THREE.Vector3(planeTest.position.x, planeTest.position.y, planeTest.position.z);
-//normalize the direction vector (convert to vector of length 1)
-            dir.normalize();
+//             const dir = new THREE.Vector3(planeTest.position.x, planeTest.position.y, planeTest.position.z);
+// //normalize the direction vector (convert to vector of length 1)
+//             dir.normalize();
 
 
             const origin = new THREE.Vector3( 0, 0, 100 );
@@ -490,13 +780,13 @@ var planeTest;
             const hex = 0x004999;
 
 
-            const arrowHelper = new THREE.ArrowHelper( dir, origin, length, hex );
-            arrowHelper.line.visible = false
-            arrowHelper.setLength (50, 20, 12)
-            console.log(arrowHelper.cone)
-            scene.add( arrowHelper );
+            // const arrowHelper = new THREE.ArrowHelper( dir, origin, length, hex );
+            // arrowHelper.line.visible = false
+            // arrowHelper.setLength (50, 20, 12)
+            // console.log(arrowHelper.cone)
+            // scene.add( arrowHelper );
 
-            const sphere = new THREE.Mesh(new THREE.SphereGeometry(15, 50, 500),
+            const sphere = new THREE.Mesh(new THREE.SphereGeometry(15, 50, 100),
                 new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load('./news.jpg')}))
 
 
@@ -507,95 +797,100 @@ var planeTest;
 
 
 
-            let sceneSpheres = [];
-
-                //scene.add( clusterSphere );
 
 
-                let envmaploader = new THREE.PMREMGenerator(renderer);
-                let clusterSphere;
-                let instance;
-                //renderer.outputEncoding = THREE.sRGBEncoding
-                new RGBELoader().load("./cayley_interior_4k.hdr", function (hdrmap) {
-
-                    let envmap = envmaploader.fromCubemap(hdrmap);
-                    let texture2 = new THREE.CanvasTexture(new FlakesTexture())
-                    texture2.wrapS = THREE.RepeatWrapping;
-                    texture2.wrapT = THREE.RepeatWrapping;
-                    texture2.repeat.x = 10;
-                    texture2.repeat.y = 6;
-
-                    const ballMaterial = {
-                        clearcoat: 1.0,
-                        cleacoatRoughness: 0.1,
-                        metalness: 0.9,
-                        roughness: 0.5,
-                        color: 0xffffff,
-                        normalMap: texture2,
-                        transparent: true,
-                        normalScale: new THREE.Vector2(0.15, 0.15),
-                        envMap: envmap.texture
-                    }
+            //scene.add( clusterSphere );
 
 
+            let envmaploader = new THREE.PMREMGenerator(renderer);
+            let clusterSphere;
+            let instance;
+            //renderer.outputEncoding = THREE.sRGBEncoding
+            new RGBELoader().load("./cayley_interior_4k.hdr", function (hdrmap) {
+
+                let envmap = envmaploader.fromCubemap(hdrmap);
+                let texture2 = new THREE.CanvasTexture(new FlakesTexture())
+                texture2.wrapS = THREE.RepeatWrapping;
+                texture2.wrapT = THREE.RepeatWrapping;
+                texture2.repeat.x = 10;
+                texture2.repeat.y = 6;
+
+                const ballMaterial = {
+                    clearcoat: 1.0,
+                    cleacoatRoughness: 0.1,
+                    metalness: 0.9,
+                    roughness: 0.5,
+                    color: 0xffffff,
+                    normalMap: texture2,
+                    transparent: true,
+                    normalScale: new THREE.Vector2(0.15, 0.15),
+                    envMap: envmap.texture
+                }
 
 
 
 
 
-                    for(let i = 0; i < response.data.clustersPoints.length; i+= 6){
-                        const clusterPoints = response.data.clustersPoints
-                        const midwayPoints = new THREE.Vector3((((clusterPoints[i+1] - clusterPoints[i])) * 400) / 2, (((clusterPoints[i+3] - clusterPoints[i+2])) * 400) / 2, (((clusterPoints[i+5] - clusterPoints[i+4]) * 100) / 2))
-                        const sphereCenter = new THREE.Vector3(((((clusterPoints[i+1] - clusterPoints[i]) / 2) + clusterPoints[i]) * 400), ((((clusterPoints[i+3] - clusterPoints[i+2]) / 2) + clusterPoints[i+2]) * 400), ((((clusterPoints[i+5] - clusterPoints[i+4]) / 2) + clusterPoints[i+4]) * 100));
-                        const sphereRadius = Math.sqrt((midwayPoints.x ** 2) + (midwayPoints.y ** 2) + (midwayPoints.z ** 2))
-                        console.log("este é o raio da esfera")
-                        console.log(sphereRadius)
-                        console.log("este é o centro da esfera")
-                        console.log(sphereCenter)
-
-                        clusterSphere = new THREE.Mesh(new THREE.SphereGeometry(sphereRadius, 50, 500),
-                            new THREE.MeshBasicMaterial({
-                                transparent: true,
-                                opacity: 1.0,
-                                map: new THREE.TextureLoader().load('./news.jpg')
-                            }))
-
-                        clusterSphere.position.set(sphereCenter.x, sphereCenter.y, sphereCenter.z)
-                        console.log("entrei neste for que me esta a irritar eae")
-                        let ballGeo = new THREE.SphereGeometry(sphereRadius, 64, 64)
-                        let ballMat = new THREE.MeshPhysicalMaterial(ballMaterial)
-                        let ballMesh = new THREE.Mesh(ballGeo, ballMat)
-                        ballMesh.position.set(clusterSphere.position.x, clusterSphere.position.y, clusterSphere.position.z);
-                        ballMesh.material.opacity = 0.2
-
-                        let instance = new TextSprite({
-                            alignment: 'center',
-                            color: '#db4035',
-                            fontFamily: '"Times New Roman", Times, serif',
-                            fontSize: 20,
-                            fontWeight: "900",
-                            fontStyle: 'areal',
-                            text: [
-                                'Cats',
 
 
-                            ].join('\n'),
-                        });
+                for(let i = 0; i < threeDImageData.clustersPoints.length; i+= 6){
+                    const clusterPoints = threeDImageData.clustersPoints
+                    const midwayPoints = new THREE.Vector3((((clusterPoints[i+1] - clusterPoints[i])) * widthMultiplier) / 2, (((clusterPoints[i+3] - clusterPoints[i+2])) * heightMultiplier) / 2, (((clusterPoints[i+5] - clusterPoints[i+4]) * depthMultiplier) / 2))
+                    const sphereCenter = new THREE.Vector3(((((clusterPoints[i+1] - clusterPoints[i]) / 2) + clusterPoints[i]) * widthMultiplier), ((((clusterPoints[i+3] - clusterPoints[i+2]) / 2) + clusterPoints[i+2]) * heightMultiplier), ((((clusterPoints[i+5] - clusterPoints[i+4]) / 2) + clusterPoints[i+4]) * depthMultiplier));
+                    const sphereRadius = Math.sqrt((midwayPoints.x ** 2) + (midwayPoints.y ** 2) + (midwayPoints.z ** 2))
+                    console.log("este é o raio da esfera")
+                    console.log(sphereRadius)
+                    console.log("este é o centro da esfera")
+                    console.log(sphereCenter)
 
-                        instance.position.set(sphereCenter.x,sphereCenter.y + sphereRadius + 10, sphereCenter.z)
-                        console.log(instance)
-                        console.log(instance.scale)
-                        scene.add(instance)
-                        scene.add(ballMesh)
-                        sceneSpheres.push(ballMesh)
-                    }
+                    clusterSphere = new THREE.Mesh(new THREE.SphereGeometry(sphereRadius, 50, 500),
+                        new THREE.MeshBasicMaterial({
+                            transparent: true,
+                            opacity: 1.0,
+                            map: new THREE.TextureLoader().load('./news.jpg')
+                        }))
+
+                    // tem de ser i%6 porque o cluster points(for de cima) aumenta de 6 em 6 e o clusterIndexes aumenta de 1 em 1
 
 
-                    console.log("esta é a clustersphere")
-                    // eslint-disable-next-line no-unused-expressions
+                    clusterSphere.position.set(sphereCenter.x, sphereCenter.y, sphereCenter.z)
+                    console.log("entrei neste for que me esta a irritar eae")
+                    let ballGeo = new THREE.SphereGeometry(sphereRadius, 64, 30)
+                    let ballMat = new THREE.MeshPhysicalMaterial(ballMaterial)
+                    let ballMesh = new THREE.Mesh(ballGeo, ballMat)
+                    ballMesh.position.set(clusterSphere.position.x, clusterSphere.position.y, clusterSphere.position.z);
+                    ballMesh.hasKeywords = false;
+                    ballMesh.pointsIndexes = threeDImageData.clusterIndexes[i/6]
+                    ballMesh.material.opacity = 0.2;
+
+                    let instance = new TextSprite({
+                        alignment: 'center',
+                        color: '#db4035',
+                        fontFamily: '"Times New Roman", Times, serif',
+                        fontSize: 20,
+                        fontWeight: "900",
+                        fontStyle: 'areal',
+                        text: [
+                            'Cats',
 
 
-                })
+                        ].join('\n'),
+                    });
+
+                    instance.position.set(sphereCenter.x,sphereCenter.y + sphereRadius + 10, sphereCenter.z)
+                    console.log(instance)
+                    console.log(instance.scale)
+                    scene.add(instance)
+                    scene.add(ballMesh)
+                    sceneSpheres.push(ballMesh)
+                }
+
+
+                console.log("esta é a clustersphere")
+                // eslint-disable-next-line no-unused-expressions
+
+
+            })
 
             renderer.toneMapping = THREE.ACESFilmicToneMapping;
             renderer.toneMappingExposure = 1.25;
@@ -605,6 +900,23 @@ var planeTest;
             //     width: 50,
             // });
             //
+
+            instance = new TextSprite({
+                alignment: 'center',
+                color: '#db4035',
+                fontFamily: '"Times New Roman", Times, serif',
+                fontSize: 20,
+                fontWeight: "900",
+                fontStyle: 'areal',
+                text: [
+                    'Cats',
+
+
+                ].join('\n'),
+            });
+
+            // instance.position.set(100,100, 100)
+            // scene.add(instance)
             // container.position.set( 400, 400, 400 );
             // //container.rotation.x = -0.55;
             //
@@ -680,6 +992,70 @@ var planeTest;
             //         //Obter a source da imagem do object clickado
             // }
 
+            // Instantiate a loader
+            const GLTLloader = new GLTFLoader();
+
+            // instantiate a loader
+
+
+// set options if needed
+            const loaderImageBitMap = new THREE.ImageBitmapLoader();
+            loaderImageBitMap.setOptions( { imageOrientation: 'flipY' } );
+
+// load a image resource
+
+
+
+
+
+            function createPanelsOfCluster(indexesOfImagesInsideSphere, i){
+
+                for(let j = 0; j < indexesOfImagesInsideSphere.length; j++){
+
+                    //const texture = new THREE.TextureLoader().load('https://large.novasearch.org/nytimes/images/206cd0c3321f129171d53aca579372662e99b8f946c01d27c42e10a8daf42f47.jpg');
+                    //const texture = GLTLloader.load('https://large.novasearch.org/nytimes/images/206cd0c3321f129171d53aca579372662e99b8f946c01d27c42e10a8daf42f47.jpg');
+
+                    //talvez mudar só para loader
+
+                        //./ExampleImage.jpg
+                        //https://large.novasearch.org/nytimes/images/206cd0c3321f129171d53aca579372662e99b8f946c01d27c42e10a8daf42f47.jpg
+
+                        // onLoad callback
+
+                    const geometry = new THREE.PlaneGeometry(4, 4, 1);
+                    const texture = new THREE.TextureLoader().load('./pre_badQuality/003d3159614e83d323610c2613bd93d21b1732affed6a642bc6338094a9c42cf-min.jpg');
+
+                            // texture.magFilter = THREE.LinearFilter;
+                            // texture.minFilter = THREE.LinearFilter;
+                            // texture.needsUpdate = true;
+
+                            const material = new THREE.MeshBasicMaterial( { map: texture } );
+                            const plane= new THREE.Mesh(geometry, material);
+
+
+                            planeTest = plane
+                            plane.position.set(threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][0] * widthMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][1] * heightMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier)
+                            //plane.position.set(Math.random()* 400, Math.random() * 400, Math.random() * 100)
+                            if(createdPlanes[i] == undefined)
+                                createdPlanes[i] = []
+
+
+                            plane.showingBadQualityImage = false
+                            plane.showingMediumQualityImage = false
+                            plane.showingHighQualityImage = false
+                            plane.indexOfImage = j
+                            createdPlanes[i].push(plane)
+                            scene.add(plane)
+
+                    // const geometry = new THREE.PlaneGeometry(4, 4, 1);
+                    // const material = new THREE.MeshBasicMaterial({map: texture});
+
+                }
+
+                console.log("esta é a primeira scene")
+                console.log(scene.children)
+            }
+
             function flyToObject(clickedObject) {
                 // get a new camera to reset .up and .quaternion on this.camera
 
@@ -721,14 +1097,25 @@ var planeTest;
                     q0 = camera.quaternion.clone();
 
 
+                let index = 0
+                //find spheres k
+                for(let k = 0; k < sceneSpheres.length; k++)
+                    if(clickedObject.uuid === sceneSpheres[k].uuid)
+                        index = k
+
+                console.log("estye é o meu index")
+                console.log(index)
+
 
 
 
                 if(clickedObject.geometry.type === 'PlaneGeometry')
-                controls.target.set(objectPosition.x, objectPosition.y, objectPosition.z + 10)
+                    controls.target.set(objectPosition.x, objectPosition.y, objectPosition.z + 10)
                 else if(clickedObject.geometry.type === 'SphereGeometry'){
                     const sphereRadius = clickedObject.geometry.boundingSphere.radius
                     controls.target.set(objectPosition.x, objectPosition.y, objectPosition.z + sphereRadius + 100)
+                    const indexesOfImagesInsideSphere = clickedObject.pointsIndexes
+                    createPanelsOfCluster(indexesOfImagesInsideSphere, index)
 
                 }
 
@@ -748,10 +1135,10 @@ var planeTest;
                 //defineTrackballControlsSettings()
                 tween.onUpdate(function(){
 
-                   time++;
-                   var deg = time / (60); // scale time 0:1
-                   THREE.Quaternion.slerp(q0, camera2.quaternion, camera.quaternion, deg);
-                   //console.log(camera.position)
+                    time++;
+                    var deg = time / (60); // scale time 0:1
+                    THREE.Quaternion.slerp(q0, camera2.quaternion, camera.quaternion, deg);
+                    //console.log(camera.position)
                     lastPosition = camera.position
                     // console.log(lastPosition)
 
@@ -768,19 +1155,19 @@ var planeTest;
                 tween.onComplete(function (){
                     //camera.position.z = controls.target.z
                     //THREE.Quaternion.slerp(q0, camera.quaternion, camera.quaternion, 1000/60);
-                     var q = camera2.quaternion,
-                         p = camera2.position,
-                         u = camera2.up,
-                         c = controls.target,
-                         zMin = 1
-                     camera.position.set(lastPosition.x, lastPosition.y, lastPosition.z);
-                     camera.up.set(u.x, u.y, u.z);
-                     camera.quaternion.set(q.x, q.y, q.z, q.w);
-                         controls.target = new THREE.Vector3(c.x, c.y, zMin);
-                         controls.update();
-                         if(clickedObject.geometry.type === 'SphereGeometry')
-                            clickedObject.visible = false
-                     //camera.position.set(0, 0 ,1000)
+                    var q = camera2.quaternion,
+                        p = camera2.position,
+                        u = camera2.up,
+                        c = controls.target,
+                        zMin = 1
+                    camera.position.set(lastPosition.x, lastPosition.y, lastPosition.z);
+                    camera.up.set(u.x, u.y, u.z);
+                    camera.quaternion.set(q.x, q.y, q.z, q.w);
+                    controls.target = new THREE.Vector3(c.x, c.y, zMin);
+                    controls.update();
+                    if(clickedObject.geometry.type === 'SphereGeometry')
+                        clickedObject.visible = false
+                    //camera.position.set(0, 0 ,1000)
                     // camera.translateX(controls.target.x)
                     // camera.translateY(controls.target.y)
 
@@ -798,6 +1185,8 @@ var planeTest;
 
 
             }
+
+
 
             // function tweenCamera() {
             //
@@ -823,28 +1212,28 @@ var planeTest;
             //         .start();
             //
             // }
-                // }
-                //prepare scope globals to transition camera
+            // }
+            //prepare scope globals to transition camera
 
-                //     .onUpdate(() => {
-                //
-                //         time++;
-                //         var deg = time / (5 * 60); // scale time 0:1
-                //         THREE.Quaternion.slerp(q0, camera.quaternion, camera.quaternion, deg);
-                //     })}
-                //     // .onComplete(() => {
-                    //     var q = camera.quaternion,
-                    //         p = camera.position,
-                    //         u = camera.up,
-                    //         c = controls.target
-                    //         //zMin = getMinCellZ();
-                    //     camera.position.set(p.x, p.y, p.z);
-                    //     camera.up.set(u.x, u.y, u.z);
-                    //     camera.quaternion.set(q.x, q.y, q.z, q.w);
-                    //     if (controls.type == 'trackball') {
-                    //         controls.target = new THREE.Vector3(c.x, c.y, 0);
-                    //         controls.update();
-                    // }})}
+            //     .onUpdate(() => {
+            //
+            //         time++;
+            //         var deg = time / (5 * 60); // scale time 0:1
+            //         THREE.Quaternion.slerp(q0, camera.quaternion, camera.quaternion, deg);
+            //     })}
+            //     // .onComplete(() => {
+            //     var q = camera.quaternion,
+            //         p = camera.position,
+            //         u = camera.up,
+            //         c = controls.target
+            //         //zMin = getMinCellZ();
+            //     camera.position.set(p.x, p.y, p.z);
+            //     camera.up.set(u.x, u.y, u.z);
+            //     camera.quaternion.set(q.x, q.y, q.z, q.w);
+            //     if (controls.type == 'trackball') {
+            //         controls.target = new THREE.Vector3(c.x, c.y, 0);
+            //         controls.update();
+            // }})}
 
 
 
@@ -874,20 +1263,24 @@ var planeTest;
             var controls = new TrackballControls(camera, renderer.domElement);
             defineTrackballControlsSettings();
 
-            const vFOV = (camera.fov * Math.PI) / 180;
-            const heightFov = 2 * Math.tan(vFOV / 2) * Math.abs(camera.position.z);
-            const width = heightFov * camera.aspect;
+            let initialVFOV = (camera.fov * Math.PI) / 180;
+            let initialHeightFov = 2 * Math.tan(initialVFOV / 2) * Math.abs(camera.position.z);
+            let initialwidthFov = initialHeightFov * camera.aspect;
+
+            let updatedVFOV = initialVFOV
+            let updatedHeightFov = initialHeightFov
+            let updatedInitialWidthFov = initialwidthFov
 
             function updateHelperPosition() {
 
 
 
                 sphere.position.x =  camera.position.x;
-                sphere.position.y =  camera.position.y + heightFov / 2 - 100;
+                sphere.position.y =  camera.position.y + initialHeightFov / 2 - 100;
                 sphere.position.z = 100
-                arrowHelper.position.x = camera.position.x //- width/2
-                arrowHelper.position.y = camera.position.y + heightFov / 2 - 100;
-                arrowHelper.setDirection(new THREE.Vector3(planeTest.position.x - camera.position.x, planeTest.position.y - camera.position.y - heightFov / 2 + 100, planeTest.position.z).normalize())
+                // arrowHelper.position.x = camera.position.x //- width/2
+                // arrowHelper.position.y = camera.position.y + heightFov / 2 - 100;
+                // arrowHelper.setDirection(new THREE.Vector3(planeTest.position.x - camera.position.x, planeTest.position.y - camera.position.y - heightFov / 2 + 100, planeTest.position.z).normalize())
 
             }
 
@@ -904,46 +1297,64 @@ var planeTest;
                 ThreeMeshUI.update();
                 TWEEN.update();
                 updateHelperPosition();
+                //console.log(updatedHeightFov)
+                updatedVFOV = (camera.fov * Math.PI) / 180;
+                updatedHeightFov = 2 * Math.tan(updatedVFOV / 2) * Math.abs(camera.position.z);
+                updatedInitialWidthFov = updatedHeightFov * camera.aspect;
+                // if(sceneSpheres[0] != undefined){
+                //     sceneSpheres[1].rotation.x += 0.01
+                //     sceneSpheres[1].rotation.y += 0.01
+                //
+                //     sceneSpheres[0].rotation.x += 0.01
+                //     sceneSpheres[0].rotation.y += 0.03
+                //     sceneSpheres[0].rotation.z += 0.02
+                //
+                //     //if()
+                // }
+
+
 
             }
 
             animate();
             //renderer.setClearColor( 0x212529, 1 );
             //renderer.setClearColor( 0x000000, 0 );
-        })
+        // acaba aqui o get axios})
+        }
 
-    },[])
+    },[threeDImageData])
 
     return(
         <>
 
-        <div ref={ref} style={{width: '100px', height: '100px', zIndex: '100', position:'relative', marginLeft: '265px', marginTop: '-23px'}}>
-            <div id="overlay">
-                <Card border="secondary" key={1}  style={{width: '220px', marginTop: '15px', marginLeft: '15px'}}>
-                    <Carousel nextLabel='none' nextIcon= '' prevIcon='' style={{borderRadius: '50%'}} interval={null}>
+            <div ref={ref} style={{width: '100px', height: '100px', zIndex: '100', position:'relative', marginLeft: '265px', marginTop: '-23px'}}>
+                {clickedImage!= "" ? (<div id="overlay">
+                    <Card border="secondary" key={1}  style={{width: '220px', marginTop: '15px', marginLeft: '15px'}}>
+                        <Carousel nextLabel='none' nextIcon= '' prevIcon='' style={{borderRadius: '50%'}} interval={null}>
                             <Carousel.Item style={{width:'220px', height:'165px'}}  >
                                 <img
-                                     style={{width:'220px', height:'165px', objectFit: "cover", overflow: "hidden"}}
-                                     className="d-block w-100"
-                                     src={clickedImage}
-                                     alt="First slide"
+                                    style={{width:'220px', height:'165px', objectFit: "cover", overflow: "hidden"}}
+                                    className="d-block w-100"
+                                    src={"https://large.novasearch.org/nytimes/images/" + clickedImage[0]._source.parsed_section[clickedImage[0]._source.image_positions[clickedImage[1]]].hash + ".jpg"}
+                                    alt="First slide"
                                 />
                             </Carousel.Item>)}
-                    </Carousel>
+                        </Carousel>
 
-                    <Card.Body >
-                        <Card.Title  > {1}. {"Ronaldo’s 3 Goals Carry Portugal to World Cup Berth"}</Card.Title>
-                        <Card.Subtitle className="mb-2 text-muted">{"2013-11-20"}</Card.Subtitle>
-                        <Card.Text style={{fontFamily: "unset", fontSize: "0.75em"}}>
-                            {"A second-half hat trick by Cristiano Ronaldo took Portugal to the World Cup finals with a 4-2 aggregate victory in its World Cup playoff against Sweden on Tuesday...."}
-                        </Card.Text>
-                        <Card.Link style={{fontFamily: "arial", fontSize: "0.75em", float:"right"}} variant="primary" href={"pre"}>See more</Card.Link>
-                    </Card.Body>
-                </Card>
+                        <Card.Body >
+                            <Card.Title  > {1}. {clickedImage[0]._source.headline.main}</Card.Title>
+                            <Card.Subtitle className="mb-2 text-muted">{clickedImage[0]._source.pub_date.substring(0,10)}</Card.Subtitle>
+                            <Card.Text style={{fontFamily: "unset", fontSize: "0.75em"}}>
+                                {clickedImage[0]._source.snippet}
+                            </Card.Text>
+                            <Card.Link style={{fontFamily: "arial", fontSize: "0.75em", float:"right"}} variant="primary" href={"pre"}>See more</Card.Link>
+                        </Card.Body>
+                    </Card>
+                </div>): <></>}
             </div>
-        </div>
         </>
     )
+
 
 }
 export default ThreeDImageVisualization
