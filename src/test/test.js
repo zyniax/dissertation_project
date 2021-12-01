@@ -281,15 +281,16 @@ export const Test = ({setBrushExtent}) => {
 
 
 
-        const width = 910,
-            height = 800;
+        // eslint-disable-next-line no-restricted-globals
+        const width = (innerWidth * 0.40) ,
+            // eslint-disable-next-line no-restricted-globals
+            height = (innerHeight * 0.47);
 
         let i = 0;
 
         const root = d3.hierarchy(data);
         const transform = d3.zoomIdentity;
         let node, link, edgepaths;
-
 
 
         const svg = d3.select(svgRef.current).append('svg')

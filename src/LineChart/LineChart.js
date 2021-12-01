@@ -39,17 +39,21 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
     useEffect(() => {
 
 
+
+
         // set the dimensions and margins of the graph
         const margin = {top: 10, right: 30, bottom: 30, left: 25},
-            width = 1000 - margin.left - margin.right,
-            height = 600 - margin.top - margin.bottom;
+            // eslint-disable-next-line no-restricted-globals
+            width = (innerWidth * 0.35) - margin.left - margin.right,
+            // eslint-disable-next-line no-restricted-globals
+            height = (innerHeight*0.47) - margin.top - margin.bottom;
 
 
 // append the svg object to the body of the page
         const svg = d3.select(svgRef.current)
             //.attr("viewBox", [0, 0, 500, 450])
             .attr("width", width  + margin.left + margin.right)
-            .attr("height", height + 200 + margin.top + margin.bottom)
+            .attr("height", height + 30 + margin.top + margin.bottom)
             .append("g")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
@@ -500,9 +504,9 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
         <div id='linechart'>
             <Container style={{ marginLeft: "10px"}}>
-                <Row style={{width: "60%"}}>
+                <Row style={{width: "80%"}}>
                     <Col >
-                        <Card style={{ width: '20rem' }}>
+                        <Card style={{ width: '80%' }}>
                             <Card.Body style={{height:'120px'}}>
                                 <Card.Title  style={{fontFamily: 'sans-serif', fontSize: '16px', fontWeight: 'bold' }}> Considered News</Card.Title>
                                 <ul style={{display: 'flex'}}>
@@ -518,7 +522,7 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                         </Card>
                     </Col>
                     <Col >
-                        <Card style={{ width: '20rem' }}>
+                        <Card style={{ width: '80%' }}>
                         <Card.Body style={{height:'120px'}}>
                             <Card.Title style={{fontFamily: 'sans-serif', fontSize: '16px', fontWeight: 'bold' }}>Shown News</Card.Title>
                             <ul>
@@ -537,7 +541,7 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
             </Container>
 
             <div style={{display:"flex"}}>
-                <svg style={{marginTop: "10px"}} ref={svgRef}/>
+                <svg style={{marginTop: "0.4%"}} ref={svgRef}/>
                 <RelevantHeadlines brushExtent={brushExtent} />
             </div>
 

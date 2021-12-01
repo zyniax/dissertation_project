@@ -28,19 +28,19 @@ const RelevantHeadlines = ({brushExtent}) => (
 
 
 
-    <div style={{fontStyle: "unset", marginTop: "20px"}}>
 
-        <Card style={{ width: '20em' }}>
+
+        <Card style={{ width: '30%'}}>
             <Card.Header>Relevant headlines from <b>{brushExtent[0]}</b> to <b>{brushExtent[1]}</b></Card.Header>
             <ListGroup variant="flush">
 
                 {dataset1.map(news => (
-                    <ListGroup.Item style={{fontSize: '12px', color:'#3e5569'}}> {news.title} <b>{news.publication_date} </b></ListGroup.Item>))}
+                    <ListGroup.Item style={{fontSize: '9px', color:'#3e5569'}}> {news.title} <b>{news.publication_date} </b></ListGroup.Item>))}
             </ListGroup>
 
         </Card>
 
-    </div>
+
 
 
 

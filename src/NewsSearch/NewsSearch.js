@@ -70,18 +70,18 @@ const NewsSearch = ({filteredNews, setImageSrc}) => {
                 </div>
                 )}
 
-            <Row xs={1} md={5} padding = "5px" style={{width: "1300px", height: "800px"}} className="news_with_scroll">
+            <Row xs={1} md={4} padding = "5px" style={{width: "100%", height: "0.80%"}} className="news_with_scroll">
 
 
                 {filteredNews.map((news, idx) => (
                     <Col xs = "3.5" key={idx}>
 
-                         <Card border="secondary" key={idx}  style={{width: '220px', marginBottom: '15px', marginLeft: '20px'}}>
+                         <Card border="secondary" key={idx}  style={{width: '105%', marginBottom: '7%', marginLeft: '10%'}}>
                              <Carousel nextLabel='none' nextIcon= '' prevIcon='' style={{borderRadius: '50%'}} interval={null}>
                                  {news._source.image_positions.map (imageIndex => (
-                                 <Carousel.Item style={{width:'220px', height:'165px'}}  >
+                                 <Carousel.Item style={{width:'100%'}}  >
                                      <img onClick={() => setImageSrc("https://large.novasearch.org/nytimes/images/" + news._source.parsed_section[imageIndex].hash + ".jpg")}
-                                         style={{width:'220px', height:'165px', objectFit: "cover", overflow: "hidden"}}
+                                         style={{width:'100%', height:'165px', objectFit: "cover", overflow: "hidden"}}
                                          className="d-block w-100"
                                          src={"https://large.novasearch.org/nytimes/images/" + news._source.parsed_section[imageIndex].hash + ".jpg"}
                                          alt="First slide"

@@ -60,45 +60,50 @@ function App() {
 
 
 
-          <div className="SearchBarsDiv" style={{marginBottom: "10px", marginTop: "20px"}}>
+          <div className="SearchBarsDiv" style={{marginTop: "1%"}}>
               <SearchBars setFilteredNews={setFilteredNews} setKeywords={setKeywords} setThreeDImageData={setThreeDImageData} />
           </div>
 
 
 
-          <div style={{width: "90%", overflow: "hidden " , marginTop: "60px", height: "100%", marginLeft: "20px" }}>
+          <div style={{width: "100%", overflow: "hidden " , marginTop: "5.5%", height: "100%", marginLeft: "0.8%" }}>
 
 
+              <Row style={{width: "100%"}}>
+
+                  <Col>
 
             <Card border="light">
-              <div style={{float:"left", marginBottom: '100px'}}>
+              <div style={{float:"left", marginBottom: '10%'}}>
 
-                      <Line_chart setBrushExtent={setBrushExtent} style={{float:"left"}} setFilteredNews={setFilteredNews} filteredNews={filteredNews} brushExtent={brushExtent}  />
-
+                  <Line_chart setBrushExtent={setBrushExtent} style={{float:"left"}} setFilteredNews={setFilteredNews} filteredNews={filteredNews} brushExtent={brushExtent}  />
                   <HorizontalBarChart keywords={keywords} filteredNews={filteredNews} setFilteredNews={setFilteredNews}/>
+                  <Test/>
+                  <ThreeDImageVisualization threeDImageData={threeDImageData} filteredNews={filteredNews}/>
 
               </div>
-
-
             </Card>
+                      </Col>
 
 
+                  <Col>
 
               <Card border="light">
-              <div  style={{display: "flex", justifyContent: "center", marginTop:'30px'}}>
+              <div  style={{display: "flex", justifyContent: "center", marginTop:'2.5%'}}>
                   <NewsSearch filteredNews={filteredNews} setImageSrc={setImageSrc} />
+                  <Manual_cropper image={image}/>
               </div>
               </Card>
+                  </Col>
 
 
 
-          <Test/>
+                  </Row>
 
-        <Manual_cropper image={image}/>
 
         <ThreeDWorldVisualization setFilteredNews={setFilteredNews}/>
 
-        <ThreeDImageVisualization threeDImageData={threeDImageData} filteredNews={filteredNews}/>
+
 
           </div>
 

@@ -795,10 +795,6 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
 
             scene.add( sphere );
 
-
-
-
-
             //scene.add( clusterSphere );
 
 
@@ -1281,6 +1277,9 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
                 // arrowHelper.position.x = camera.position.x //- width/2
                 // arrowHelper.position.y = camera.position.y + heightFov / 2 - 100;
                 // arrowHelper.setDirection(new THREE.Vector3(planeTest.position.x - camera.position.x, planeTest.position.y - camera.position.y - heightFov / 2 + 100, planeTest.position.z).normalize())
+            }
+
+            function returnKeywords(){
 
             }
 
