@@ -23,8 +23,8 @@
     "web-vitals": "^1.1.2"
   },
   "scripts": {
-    "start": "node server",
-    "build": "cd react-ui/ && npm install && npm run build",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -49,5 +49,5 @@
   "devDependencies": {
     "axios": "^0.21.4"
   },
-  "proxy": "http://localhost:3000/"
+  "proxy": "https://dissertationserver.herokuapp.com/"
 }
