@@ -34,10 +34,13 @@ const handleMouseClickRequest = () => {
     // })
 
 
+    http://localhost:3000/api/request/
 
-    axios.get('http://localhost:3000/api/request/' + searchTerm,{
+
+    axios.get('https://dissertationserver.herokuapp.com/' + searchTerm,{
         headers: {
-            'Access-Control-Allow-Origin': 'http://localhost:3000',
+            //MUDAR
+            'Access-Control-Allow-Origin': 'https://dissertationserver.herokuapp.com',
             'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
             'Access-Control-Allow-Headers': 'application/json'
         }
