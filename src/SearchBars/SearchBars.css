@@ -6,11 +6,12 @@
 .webdesigntuts-workshop:after {
     content: '';
     display: block;
-    height: 1px;
+    height: 0.1%;
     left: 60%;
-    margin: 0 0 0 -400px;
+    margin-left: -21%;
     position: absolute;
-    width: 400px;
+    width: 22%;
+
 }
 
 .webdesigntuts-workshop:before {

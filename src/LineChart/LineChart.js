@@ -44,9 +44,9 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
         // set the dimensions and margins of the graph
         const margin = {top: 10, right: 30, bottom: 30, left: 25},
             // eslint-disable-next-line no-restricted-globals
-            width = (innerWidth * 0.35) - margin.left - margin.right,
+            width = (outerWidth * 0.50) - margin.left - margin.right,
             // eslint-disable-next-line no-restricted-globals
-            height = (innerHeight*0.47) - margin.top - margin.bottom;
+            height = (outerHeight*0.47) - margin.top - margin.bottom;
 
 
 // append the svg object to the body of the page
@@ -141,9 +141,9 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                    .data(data)
                   .enter().append("circle")
                   .style("stroke", "steelblue")
-                   .style("fill", "steelblue")
-                     .attr("clip-path", "url(#clip)")
-                   .attr("r", 3)
+                  .style("fill", "steelblue")
+                  .attr("clip-path", "url(#clip)")
+                  .attr("r", 4)
                   .attr("cx", function(d) { return x(d3.timeParse("%Y-%m-%d")(d._source.pub_date.substring(0,10))) })
                   .attr("cy", function(d) { return y(d._score) })
                  .on('mouseover',handleMouseOver)
@@ -152,8 +152,8 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                        .transition()
                        .duration(300)
                        .attr('stroke-width',0)
-                    tooltip.transition()
-                        .style('opacity', 0)
+                    //tooltip.transition()
+                        //.style('opacity', 0)
 
                     svg.selectAll(".score,.date,.keywords,.headline").remove()
 
@@ -435,15 +435,15 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
 
         //tooltip
-        const tooltip = d3.select('body').append('div')
-            .style('position', 'absolute')
-            .style('background', '#f4f4f4')
-            .style('padding', '5 15px')
-            .style('border', '1px #333 solid')
-            .style('border-radius', '5px')
-            .style('opacity', '0')
-
-        const tooltip2 = d3.select('body').append("div")
+        // const tooltip = d3.select('body').append('div')
+        //     .style('position', 'absolute')
+        //     .style('background', '#f4f4f4')
+        //     .style('padding', '5 15px')
+        //     .style('border', '1px #333 solid')
+        //     .style('border-radius', '5px')
+        //     .style('opacity', '0')
+        //
+        // const tooltip2 = d3.select('body').append("div")
 
 
 
@@ -455,8 +455,8 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                 .duration(100)
                 .attr('stroke-width',7)
 
-            tooltip.transition()
-                .style('opacity', 1)
+            //tooltip.transition()
+                //.style('opacity', 1)
 
 
 
@@ -484,10 +484,10 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                 .attr("dy", ".35em")
                 .text("Headline: " + d._source.headline.main );
 
-            tooltip.html("<p><b>Number of headlines</b>: " + 126 + "</p> <p><b>Data</b>: " + d.publication_date + "</p>" +
-                "<p> Keywords: " +d.Keywords + " </p><p>Topics: Football, Atletism, Sports</p>")
-                .style('left', (event.pageX) + 'px')
-                .style('top', (event.pageY+ 'px'));
+            // tooltip.html("<p><b>Number of headlines</b>: " + 126 + "</p> <p><b>Data</b>: " + d.publication_date + "</p>" +
+            //     "<p> Keywords: " +d.Keywords + " </p><p>Topics: Football, Atletism, Sports</p>")
+            //     .style('left', (event.pageX) + 'px')
+            //     .style('top', (event.pageY+ 'px'));
 
 
 
@@ -503,10 +503,10 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
     return (
 
         <div id='linechart'>
-            <Container style={{ marginLeft: "10px"}}>
-                <Row style={{width: "80%"}}>
+            <Container >
+                <Row style={{width: "100%"}}>
                     <Col >
-                        <Card style={{ width: '80%' }}>
+                        <Card style={{ width: '90%', boxShadow: "0 2px 0 rgba(90, 97, 105, 0.11), 0 4px 8px rgba(90, 97, 105, 0.12), 0 10px 10px rgba(90, 97, 105, 0.06), 0 7px 70px rgba(90, 97, 105, 0.1)", marginTop:"5%" }}>
                             <Card.Body style={{height:'120px'}}>
                                 <Card.Title  style={{fontFamily: 'sans-serif', fontSize: '16px', fontWeight: 'bold' }}> Considered News</Card.Title>
                                 <ul style={{display: 'flex'}}>
@@ -522,7 +522,7 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                         </Card>
                     </Col>
                     <Col >
-                        <Card style={{ width: '80%' }}>
+                        <Card style={{ width: '90%', boxShadow: "0 2px 0 rgba(90, 97, 105, 0.11), 0 4px 8px rgba(90, 97, 105, 0.12), 0 10px 10px rgba(90, 97, 105, 0.06), 0 7px 70px rgba(90, 97, 105, 0.1)", marginTop:"5%"  }}>
                         <Card.Body style={{height:'120px'}}>
                             <Card.Title style={{fontFamily: 'sans-serif', fontSize: '16px', fontWeight: 'bold' }}>Shown News</Card.Title>
                             <ul>
@@ -537,12 +537,28 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                     </Card>
                     </Col>
 
+                    <Col >
+                        <Card style={{ width: '90%', boxShadow: "0 2px 0 rgba(90, 97, 105, 0.11), 0 4px 8px rgba(90, 97, 105, 0.12), 0 10px 10px rgba(90, 97, 105, 0.06), 0 7px 70px rgba(90, 97, 105, 0.1)", marginTop:"5%"  }}>
+                            <Card.Body style={{height:'120px'}}>
+                                <Card.Title style={{fontFamily: 'sans-serif', fontSize: '16px', fontWeight: 'bold' }}>Relevant Timeline</Card.Title>
+                                <ul>
+                                    <il>
+
+                                    </il>
+                                    <il>
+                                        <span style={{fontSize: '24px', fontWeight: '350', color:'#6857da'}}>{stateNumberOfDatesBetweenTheStartingAndEndDate}</span>
+                                    </il>
+                                </ul>
+                            </Card.Body>
+                        </Card>
+                    </Col>
+
                 </Row>
             </Container>
 
             <div style={{display:"flex"}}>
-                <svg style={{marginTop: "0.4%"}} ref={svgRef}/>
-                <RelevantHeadlines brushExtent={brushExtent} />
+                <svg style={{marginTop: "1.8%"}} ref={svgRef}/>
+
             </div>
 
         </div>

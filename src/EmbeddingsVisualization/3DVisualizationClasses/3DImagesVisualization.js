@@ -29,6 +29,7 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
     let additionalSphereKeywords = [];
     let lastIntersectedSpheres = []
     let createdPlanes = []
+    let key = 0
     const widthMultiplier = 600
     const heightMultiplier = 600
     const depthMultiplier = 100
@@ -44,6 +45,7 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
 
 
 
+            key++;
             const response = threeDImageData
         // axios.get('http://localhost:3000/api/request/umap3D',{
         //     headers: {
@@ -56,7 +58,7 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(
                 50,
-                1200 / 900,
+                850 / 900,
                 0.1,
                 1000
             )
@@ -68,7 +70,7 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
                 }
             )
 
-            renderer.setSize(1200, 900)
+            renderer.setSize(850, 900)
             renderer.setPixelRatio(window.devicePixelRatio)
             document.body.appendChild((renderer.domElement))
             ref.current.appendChild(renderer.domElement);
@@ -1326,7 +1328,9 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
     return(
         <>
 
-            <div ref={ref} style={{width: '100px', height: '100px', zIndex: '100', position:'relative', marginLeft: '265px', marginTop: '-23px'}}>
+
+
+            <div key = {key} ref={ref} style={{width: '100px', height: '100px', position:'relative'}}>
                 {clickedImage!= "" ? (<div id="overlay">
                     <Card border="secondary" key={1}  style={{width: '220px', marginTop: '15px', marginLeft: '15px'}}>
                         <Carousel nextLabel='none' nextIcon= '' prevIcon='' style={{borderRadius: '50%'}} interval={null}>

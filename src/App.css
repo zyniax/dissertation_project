@@ -1,5 +1,5 @@
 #root{
-
+    background-color: #edeef1
 }
 
 .App {
@@ -43,6 +43,7 @@
 
 .SearchBarsDiv {
   text-align: center;
+
 }
 
 *{
