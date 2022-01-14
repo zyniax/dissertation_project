@@ -12,13 +12,11 @@ import {BsImage} from 'react-icons/bs'
 
 
 
-const NewsSearch = ({filteredNews, setImageSrc, setFilteredNews, setKeywords, setThreeDImageData}) => {
+const NewsSearch = ({filteredNews, setImageSrc, setFilteredNews, setKeywords, setThreeDImageData, setLineChartFiltedredNews, selectedNewsId, setSelectedNewsId}) => {
     console.log("este é o filtered news do newsSearch")
     console.log(filteredNews)
 
-    const [newsCollection, setnewsCollection] = useState([]);
-    const [isShown, setIsShown] = useState(false);
-    const [selectedNews, setSelectedNews] = useState("")
+    const [selectedNews, setSelectedNews] = useState([])
 
     const sortNewsByDate = () => {
         filteredNews.sort(function(a,b){
@@ -45,6 +43,7 @@ const NewsSearch = ({filteredNews, setImageSrc, setFilteredNews, setKeywords, se
             setFilteredNews(response.data.searchWordResult.body.hits.hits)
             setKeywords(response.data.keywords)
             setThreeDImageData(response.data)
+            setLineChartFiltedredNews(response.data.searchWordResult.body.hits.hits)
 
         })
     }
@@ -66,7 +65,7 @@ const NewsSearch = ({filteredNews, setImageSrc, setFilteredNews, setKeywords, se
                 {selectedNews != "" && ( <div style={{position: "relative"}}>
 
 
-                    <Card border="secondary"   style={{width: '70%', marginLeft: "17.5%", marginBottom:" 5%"}}>
+                    <Card border="danger"   style={{width: '70%', marginLeft: "17.5%", marginBottom:" 5%"}}>
                         <Carousel nextLabel='none' nextIcon= '' prevIcon='' style={{borderRadius: '50%'}} interval={null}>
                             {selectedNews._source.image_positions.map (imageIndex => (
                                 <Carousel.Item style={{width:'100%'}}  >
@@ -80,17 +79,14 @@ const NewsSearch = ({filteredNews, setImageSrc, setFilteredNews, setKeywords, se
                         </Carousel>
 
                         <Card.Body >
-                            <img onClick={() => handleMouseClickRequest()}
-                                 style={{width:'7%', height:'27px', objectFit: "cover", overflow: "hidden", float:"right", marginTop: "-2%", marginRight:" -2.5%"}}
-                                 src=<FaBeer/>
-                                 alt="First slide"
+                            <BsImage onClick={() => handleMouseClickRequest()}
+                                     style={{width:'12%', height:'27px', objectFit: "cover", overflow: "hidden", float:"right", marginTop: "-5%", marginRight:" -6.5%"}}
+                            />
+                            <ImNewspaper onClick={() => handleMouseClickRequest()}
+                                         style={{width:'15%', height:'27px', objectFit: "cover", overflow: "hidden", float:"right", marginTop: "-5%"}}
+
                             />
 
-                            <img onClick={() => handleMouseClickRequest()}
-                                 style={{width:'5%', height:'27px', objectFit: "cover", overflow: "hidden", float:"right", marginTop: "-2%"}}
-                                 src={FaBeer}
-                                 alt="First slide"
-                            />
                             <Card.Title  > {1}. {selectedNews._source.headline.main}</Card.Title>
                             <Card.Subtitle className="mb-2 text-muted">{selectedNews._source.pub_date.substring(0,10)}</Card.Subtitle>
                             <Card.Text style={{fontFamily: "unset", fontSize: "0.75em"}}>
@@ -114,7 +110,9 @@ const NewsSearch = ({filteredNews, setImageSrc, setFilteredNews, setKeywords, se
                              <Carousel nextLabel='none' nextIcon= '' prevIcon='' style={{borderRadius: '50%'}} interval={null}>
                                  {news._source.image_positions.map (imageIndex => (
                                  <Carousel.Item style={{width:'100%'}}  >
-                                     <img onClick={() => setSelectedNews(news)}
+                                     <img onClick={() => {setSelectedNews(news);
+                                     setSelectedNewsId(news._id + "_" + news._source.parsed_section[imageIndex].order)} }
+
                                          style={{width:'100%', height:'165px', objectFit: "cover", overflow: "hidden"}}
                                          className="d-block w-100"
                                          src={"https://large.novasearch.org/nytimes/images/" + news._source.parsed_section[imageIndex].hash + ".jpg"}

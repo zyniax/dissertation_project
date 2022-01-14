@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 
 
 
-export const HorizontalBarChart = ({keywords, filteredNews, setFilteredNews}) => {
+export const HorizontalBarChart = ({keywords, filteredNews, setFilteredNews, setLineChartFiltedredNews}) => {
 
 
     console.log("estas são as keywords")
@@ -88,6 +88,7 @@ export const HorizontalBarChart = ({keywords, filteredNews, setFilteredNews}) =>
                             filteredNewsToSet.push(filteredNews[d.target.__data__[1][i]])
                         }
                         setFilteredNews(filteredNewsToSet)
+                        setLineChartFiltedredNews(filteredNewsToSet)
                     })
             console.log("isto foi chamado")
 
@@ -101,7 +102,7 @@ export const HorizontalBarChart = ({keywords, filteredNews, setFilteredNews}) =>
 
     return (
 
-        <div style={{marginLeft: '2%'}} ref={svgRef}/>
+        <div style={{marginLeft: '4%'}} ref={svgRef}/>
     );
 }
 export default HorizontalBarChart;

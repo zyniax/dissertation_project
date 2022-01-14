@@ -22,8 +22,6 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
     let imageIndex = 0
     const [clickedImage, setClickedImage] = useState("")
 
-    console.log("filterednews da imagem 3d")
-    console.log(filteredNews[0])
 
     let sceneSpheres = [];
     let additionalSphereKeywords = [];
@@ -58,7 +56,7 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(
                 50,
-                850 / 900,
+                900 / 900,
                 0.1,
                 1000
             )
@@ -70,7 +68,7 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
                 }
             )
 
-            renderer.setSize(850, 900)
+            renderer.setSize(900, 900)
             renderer.setPixelRatio(window.devicePixelRatio)
             document.body.appendChild((renderer.domElement))
             ref.current.appendChild(renderer.domElement);

@@ -1,0 +1,44 @@
+{
+"nodes":[
+  { "id": "good" },     { "id": "impossible" },    { "id": "many" },
+  { "id": "other" },    { "id": "first" },         { "id": "right" },
+  { "id": "free" },     { "id": "own" },           { "id": "able" },
+  { "id": "great" },    { "id": "best" },          { "id": "Portuguese" },
+  { "id": "third" },    { "id": "Real" },          { "id": "11th" },
+  { "id": "reliable" }, { "id": "last" },          { "id": "exceptional" },
+  { "id": "fine" },     { "id": "more" },          { "id": "new" },
+  { "id": "modern" },   { "id": "Italian" },       { "id": "past" },
+  { "id": "top" },      { "id": "secure" },        { "id": "special" },
+  { "id": "magical" },  { "id": "extraordinary" }, { "id": "greater" },
+  { "id": "old" },      { "id": "former" },        { "id": "main" },
+  { "id": "16-year" },  { "id": "finished" },      { "id": "consistent" },
+  { "id": "upward" },   { "id": "same" },          { "id": "accomplished" },
+  { "id": "second" },   { "id": "different" },     { "id": "financial" },
+  { "id": "similar" },  { "id": "next" },          { "id": "big" },
+  { "id": "extra" },    { "id": "greatest" },      { "id": "national" },
+  { "id": "German" },   { "id": "European" },      { "id": "More" },
+  { "id": "global" },   { "id": "international" }, { "id": "prime" },
+  { "id": "clean" },    { "id": "final" },         { "id": "Swedish" },
+  { "id": "few" },      { "id": "remarkable" },    { "id": "fourth" },
+  { "id": "enough" },   { "id": "defensive" },     { "id": "straight" },
+  { "id": "friendly" }, { "id": "strong" },        { "id": "important" },
+  { "id": "broken" },   { "id": "possible" },      { "id": "consecutive" },
+  { "id": "usual" },    { "id": "difficult" },     { "id": "only" },
+  { "id": "better" },   { "id": "left" },          { "id": "dangerous" },
+  { "id": "American" }, { "id": "single" },        { "id": "much" },
+  { "id": "sharp" },    { "id": "confident" },     { "id": "perfect" },
+  { "id": "alive" },    { "id": "medical" },       { "id": "fit" },
+  { "id": "early" },    { "id": "full" },          { "id": "impressive" },
+  { "id": "fifth" },    { "id": "hard" },          { "id": "major" },
+  { "id": "30th" },     { "id": "56th" },          { "id": "easy" },
+  { "id": "physical" }, { "id": "little" },        { "id": "young" },
+  { "id": "clear" },    { "id": "high" },          { "id": "sixth" },
+  { "id": "prolific" }
+], "links": [
+  {
+    "source": "broken",
+    "target": "usual",
+    "value": 1
+  }
+]}
+

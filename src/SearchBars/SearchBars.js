@@ -4,7 +4,7 @@ import './SearchBars.css'
 import React, {useEffect, useState} from "react";
 
 
-const SearchBars = ({image, setFilteredNews, setKeywords, setThreeDImageData}) => {
+const SearchBars = ({image, setFilteredNews, setKeywords, setThreeDImageData, setLineChartFiltedredNews, setNodes, setnodeEdges, setWordsToNews}) => {
 
     const [searchTerm, setSearchTerm] = useState("")
     const [searchTermHistory, setSearchTermHistory] = useState([])
@@ -23,14 +23,21 @@ const handleMouseClickRequest = () => {
 
 
         setFilteredNews(response.data.searchWordResult.body.hits.hits)
+        setLineChartFiltedredNews(response.data.searchWordResult.body.hits.hits)
         setKeywords(response.data.keywords)
         setThreeDImageData(response.data)
+        setnodeEdges(response.data.edges)
+        setNodes(response.data.nodes)
+        const wordsToNewsMap = new Map(Object.entries(response.data.wordToNewsMap));
+        console.log("este é o wordstonewsMap",wordsToNewsMap)
+        setWordsToNews(wordsToNewsMap)
 
         console.log("esta é a nova data mas nova nova")
         console.log(response.data)
         console.log("oyeahyeah")
         console.log(response.data.searchWordResult.body.hits.hits)
         console.log(response.data.keywords)
+        console.log("este é o word to newsmap", response.data.wordToNewsMap)
 
     })
 }
