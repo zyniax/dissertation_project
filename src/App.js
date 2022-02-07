@@ -22,13 +22,23 @@ function App() {
     const [image, setImageSrc] = useState("");
     const [brushExtent, setBrushExtent] = useState([]);
     const [filteredNews, setFilteredNews] = useState([]);
+    const [newsOfTheDay, setNewsOfTheDay] = useState([]);
     const [threeDImageData, setThreeDImageData] = useState([]);
     const [keywords, setKeywords] = useState([]);
     const [lineChartFiltedredNews, setLineChartFiltedredNews] = useState([]);
     const [nodes, setNodes] = useState("");
+    const [pastNodes, setPastNodes] = useState([]);
     const [nodeEdges, setnodeEdges] = useState("");
+    const [pastNodeEdges, setPastNodeEdges] = useState([]);
     const [wordsToNews, setWordsToNews] = useState([]);
+    const [pastWordToNewsMap, setPastWordToNewsMap] = useState([])
+    const [selectedNews, setSelectedNews] = useState([])
     const [selectedNewsId, setSelectedNewsId] = useState("");
+    const [searchTermHistory, setSearchTermHistory] = useState([])
+    const [pastResultSearchNews,setPastResultSearchNews] = useState([])
+    const [searchTerm, setSearchTerm] = useState([])
+    const [applicationState, setApplicationState] = useState([])
+    const [initialFilteredNews, setInitialFilteredNews] = useState([])
 
 
 
@@ -55,7 +65,9 @@ function App() {
             console.log(data.hits.hits[0]._source.pub_date)
             console.log(data.hits.hits[0]._source)
             setFilteredNews(data.hits.hits)
+            setNewsOfTheDay(data.hits.hits)
             setLineChartFiltedredNews(data.hits.hits)
+
             console.log(data)
 
     });
@@ -74,7 +86,13 @@ function App() {
 
 
           <div className="SearchBarsDiv" style={{marginTop: "1%"}}>
-              <SearchBars setFilteredNews={setFilteredNews} setKeywords={setKeywords} setThreeDImageData={setThreeDImageData} setLineChartFiltedredNews={setLineChartFiltedredNews} setNodes={setNodes} setnodeEdges={setnodeEdges} setWordsToNews={setWordsToNews} />
+              <SearchBars setFilteredNews={setFilteredNews} setKeywords={setKeywords} setThreeDImageData={setThreeDImageData} setLineChartFiltedredNews={setLineChartFiltedredNews}
+                          setNodes={setNodes} setnodeEdges={setnodeEdges} setWordsToNews={setWordsToNews} newsOfTheDay={newsOfTheDay} setSelectedNewsId={setSelectedNewsId}
+                          searchTermHistory={searchTermHistory} setSearchTermHistory={setSearchTermHistory} pastResultSearchNews={pastResultSearchNews}
+                          setPastResultSearchNews={setPastResultSearchNews} searchTermHistory={searchTermHistory} setSearchTermHistory={setSearchTermHistory}
+                          searchTerm={searchTerm} setSearchTerm={setSearchTerm} applicationState={applicationState} setApplicationState={setApplicationState}
+                          setInitialFilteredNews={setInitialFilteredNews} pastNodes={pastNodes} setPastNodes={setPastNodes} pastNodeEdges={pastNodeEdges}
+                          setPastNodeEdges={setPastNodeEdges} pastWordToNewsMap={pastWordToNewsMap} setPastWordToNewsMap={setPastWordToNewsMap}  />
           </div>
 
 
@@ -100,8 +118,19 @@ function App() {
 
                                   <div style={{float:"left", marginBottom: '10%'}}>
 
-                                      <Test selectedNewsId={selectedNewsId}/>
-                                      <WordGraphVisualization nodes={nodes} nodeEdges={nodeEdges} wordsToNews={wordsToNews} setFilteredNews={setFilteredNews} filteredNews={filteredNews} setLineChartFiltedredNews={setLineChartFiltedredNews}/>
+                                      <Test selectedNewsId={selectedNewsId} setSelectedNewsId={setSelectedNewsId} setSelectedNews={setSelectedNews} filteredNews={lineChartFiltedredNews} setFilteredNews={setFilteredNews} setKeywords={setKeywords} setThreeDImageData={setThreeDImageData} setLineChartFiltedredNews={setLineChartFiltedredNews}  selectedNews={selectedNews} pastResultSearchNews={pastResultSearchNews} setPastResultSearchNews={setPastResultSearchNews} searchTermHistory={searchTermHistory} setSearchTermHistory={setSearchTermHistory}/>
+
+                                  </div>
+                              </Card>
+                          </Tab>
+
+                          <Tab eventKey="Word Graph" title="Word Graph">
+                              <Card style={{backgroundColor: "#fff",  borderRadius: "0.625rem", boxShadow: "0 2px 0 rgba(90, 97, 105, 0.11), 0 4px 8px rgba(90, 97, 105, 0.12), 0 10px 10px rgba(90, 97, 105, 0.06), 0 7px 70px rgba(90, 97, 105, 0.1)" }}>
+
+
+                                  <div style={{float:"left", marginBottom: '10%'}}>
+
+                                      <WordGraphVisualization nodes={nodes} nodeEdges={nodeEdges} wordsToNews={wordsToNews} setFilteredNews={setFilteredNews} filteredNews={filteredNews} setLineChartFiltedredNews={setLineChartFiltedredNews} initialFilteredNews={initialFilteredNews}/>
 
                                   </div>
                               </Card>
@@ -124,7 +153,7 @@ function App() {
                                   <div style={{float:"left", marginBottom: '10%'}}>
 
                                       <Line_chart setBrushExtent={setBrushExtent} style={{float:"left"}} setFilteredNews={setFilteredNews} filteredNews={filteredNews} brushExtent={brushExtent} lineChartFiltedredNews={lineChartFiltedredNews} setLineChartFiltedredNews={setLineChartFiltedredNews} />
-                                      <HorizontalBarChart keywords={keywords} filteredNews={filteredNews} setLineChartFiltedredNews={setLineChartFiltedredNews} setFilteredNews={setFilteredNews}/>
+                                      <HorizontalBarChart keywords={keywords} filteredNews={filteredNews} setLineChartFiltedredNews={setLineChartFiltedredNews} setFilteredNews={setFilteredNews} lineChartFiltedredNews={lineChartFiltedredNews}/>
 
                                   </div>
                               </Card>
@@ -140,7 +169,14 @@ function App() {
 
               <Card style={{justifyContent: "center", backgroundColor: "#fff",  borderRadius: "0.625rem", boxShadow: "0 2px 0 rgba(90, 97, 105, 0.11), 0 4px 8px rgba(90, 97, 105, 0.12), 0 10px 10px rgba(90, 97, 105, 0.06), 0 7px 70px rgba(90, 97, 105, 0.1)" }}>
                 <div>
-                    <NewsSearch filteredNews={lineChartFiltedredNews} setImageSrc={setImageSrc} setFilteredNews={setFilteredNews} setKeywords={setKeywords} setThreeDImageData={setThreeDImageData} setLineChartFiltedredNews={setLineChartFiltedredNews} selectedNewsId={selectedNewsId} setSelectedNewsId={setSelectedNewsId} />
+                    <NewsSearch filteredNews={lineChartFiltedredNews} setImageSrc={setImageSrc} setFilteredNews={setFilteredNews} setKeywords={setKeywords} setThreeDImageData={setThreeDImageData}
+                                setLineChartFiltedredNews={setLineChartFiltedredNews} selectedNewsId={selectedNewsId} setSelectedNewsId={setSelectedNewsId}
+                                selectedNews={selectedNews} setSelectedNews={setSelectedNews} pastResultSearchNews={pastResultSearchNews}
+                                setPastResultSearchNews={setPastResultSearchNews} searchTermHistory={searchTermHistory} setSearchTermHistory={setSearchTermHistory}
+                                setNodes={setNodes} setnodeEdges={setnodeEdges} setInitialFilteredNews={setInitialFilteredNews} setWordsToNews={setWordsToNews}
+                                pastNodes={pastNodes} setPastNodes={setPastNodes} pastNodeEdges={pastNodeEdges} setPastNodeEdges={setPastNodeEdges} pastWordToNewsMap={pastWordToNewsMap}
+                                setPastWordToNewsMap={setPastWordToNewsMap}/>
+
                      <Manual_cropper image={image}/>
                 </div>
 
@@ -149,7 +185,6 @@ function App() {
 
 
               </Row>
-
         <ThreeDWorldVisualization  setFilteredNews={setFilteredNews}/>
           </div>
 

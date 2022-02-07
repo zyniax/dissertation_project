@@ -6,6 +6,8 @@ import HorizontalBarChart from "./HorizontalBarChart/HorizontalBarChart";
 
 import * as d3 from 'd3';
 import RelevantHeadlines from "./RelevantHeadlines/RelevantHeadlines";
+import {BsImage} from "react-icons/bs";
+import {ImNewspaper} from "react-icons/im";
 
 
 
@@ -22,6 +24,8 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
     const [arrayLenght, getArrayLength] = useState(newsLength);
     const [stateNumberOfDatesBetweenTheStartingAndEndDate, setnumberOfDatesBetweenTheStartingAndEndDate] = useState(0);
+
+
 
 
 
@@ -57,6 +61,13 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 //Read the data
             if(filteredNews.length > 0) {
 
+                var pastBrushedData = {
+                    data: null,
+                    domain0: null,
+                    domain1: null
+                }
+
+
 
                     var data = filteredNews
 
@@ -67,15 +78,27 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                         .domain(d3.extent(data, function (d) {
                             return d3.timeParse("%Y-%m-%d")(d._source.pub_date.substring(0, 10))
                         }))
-                        .range([0, width]);
+                        .range([3, width * 0.995]);
                     const xAxis = svg.append("g")
                         .attr("transform", "translate(0," + height + ")")
                         .call(d3.axisBottom(x));
 
+
+
+                pastBrushedData.data = data
+                pastBrushedData.domain0 = x.domain()[0]
+                pastBrushedData.domain1 = x.domain()[1]
+                var brushedData = pastBrushedData
+
+                var pastBrushedArray = [brushedData]
+
                     // Add Y axis
                     var y = d3.scaleLinear()
-                        .domain([0, d3.max(data, function (d) {
-                            return +d._score;
+                        .domain([d3.min(data, function (d) {
+                            return (d._score * 0.97);
+                        })
+                            , d3.max(data, function (d) {
+                            return (+d._score * 1.02);
                         })])
                         .range([height, 0]);
                     const yAxis = svg.append("g")
@@ -152,10 +175,13 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
                             svg.selectAll(".score,.date,.keywords,.headline").remove()
 
+                            const informationWidth = (width * 0.01)
+                            const informationHeight = (height * 0.02)
+
                             svg.append("text")
                                 .attr("class", "score")
-                                .attr("x", 10)
-                                .attr("y", 10)
+                                .attr("x", informationWidth)
+                                .attr("y", informationHeight)
                                 .attr("dy", ".35em")
                                 .style("font-size", "12px")
                                 .style("font-family", "Saira")
@@ -163,8 +189,8 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
                             svg.append("text")
                                 .attr("class", "date")
-                                .attr("x", 10)
-                                .attr("y", 22)
+                                .attr("x", informationWidth)
+                                .attr("y", informationHeight * 2.4)
                                 .attr("dy", ".35em")
                                 .style("font-size", "12px")
                                 .style("font-family", "Saira")
@@ -172,8 +198,8 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
                             svg.append("text")
                                 .attr("class", "keywords")
-                                .attr("x", 10)
-                                .attr("y", 34)
+                                .attr("x", informationWidth)
+                                .attr("y", informationHeight * 3.8)
                                 .attr("dy", ".35em")
                                 .style("font-size", "12px")
                                 .style("font-family", "Saira")
@@ -181,12 +207,21 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
                             svg.append("text")
                                 .attr("class", "headline")
-                                .attr("x", 10)
-                                .attr("y", 46)
+                                .attr("x", informationWidth)
+                                .attr("y", informationHeight * 5.2)
                                 .attr("dy", ".35em")
                                 .style("font-size", "12px")
                                 .style("font-family", "Saira")
                                 .html("Headline: ");
+
+
+                            tooltip.style("opacity", 0)
+                            tooltip.style("left", "0px")
+                            tooltip.style("top", "0px")
+                            tooltip.html("o")
+
+
+                            //setMouseOverNews("")
                         })
 
                     var x2 = d3.scaleTime()
@@ -224,10 +259,13 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
                     // Create a new <text> element for every data element.
 
+                const informationWidth = (width * 0.01)
+                const informationHeight = (height * 0.02)
+
                     svg.append("text")
                         .attr("class", "score")
-                        .attr("x", 10)
-                        .attr("y", 10)
+                        .attr("x", informationWidth)
+                        .attr("y", informationHeight)
                         .attr("dy", ".35em")
                         .style("font-size", "12px")
                         .style("font-family", "Saira")
@@ -235,8 +273,8 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
                     svg.append("text")
                         .attr("class", "date")
-                        .attr("x", 10)
-                        .attr("y", 22)
+                        .attr("x", informationWidth)
+                        .attr("y", informationHeight * 2.4)
                         .attr("dy", ".35em")
                         .style("font-size", "12px")
                         .style("font-family", "Saira")
@@ -244,8 +282,8 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
                     svg.append("text")
                         .attr("class", "keywords")
-                        .attr("x", 10)
-                        .attr("y", 34)
+                        .attr("x", informationWidth)
+                        .attr("y", informationHeight * 3.8)
                         .attr("dy", ".35em")
                         .style("font-size", "12px")
                         .style("font-family", "Saira")
@@ -253,12 +291,21 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
                     svg.append("text")
                         .attr("class", "headline")
-                        .attr("x", 10)
-                        .attr("y", 46)
+                        .attr("x", informationWidth)
+                        .attr("y", informationHeight * 5.4)
                         .attr("dy", ".35em")
                         .style("font-size", "12px")
                         .style("font-family", "Saira")
                         .html("Headline: ");
+
+                svg.append("text")
+                    .attr("class", "dblClick")
+                    .attr("x", width * 0.87)
+                    .attr("y", height * 0.98)
+                    .attr("dy", ".35em")
+                    .style("font-size", "12px")
+                    .style("font-family", "Saira")
+                    .html("Double click to go back ");
 
 
                     //add the rectangle with time
@@ -276,7 +323,12 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                     //   .attr("width", 370)
                     //   .attr("height", 46)
 
+                let extent1;
+                let extent2;
+
                     function brushed(event) {
+
+
 
                         // var s = event.selection || x2.range();
                         // x.domain(s.map(x2.invert, x2));
@@ -322,11 +374,13 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                         console.log("evente selecito;" + event.selection)
 
 
+
                         // If no selection, back to initial coordinate. Otherwise, update X axis domain
                         if (!extent) {
                             if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
                             x.domain([4, 8])
                         } else {
+                            console.log(x.domain()[0])
                             //var a = d3.timeDay.count(dataset1[0].publication_date, dataset1[2].publication_date);
                             //console.log(dataset1[0].publication_date < dataset1[2].publication_date)
                             //var shownNews = 0;
@@ -338,8 +392,22 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                             var date1 = "" + x.invert(extent[0]) + ""
                             var date2 = "" + x.invert(extent[1]) + ""
 
-                            console.log("Esx 1111" + extent[0])
-                            console.log("Ex 2222" + extent[1])
+                            var pastBrushedData = {
+                                data: null,
+                                domain0: null,
+                                domain1: null
+                            }
+
+                            pastBrushedData.domain0 = x.domain()[0]
+                            pastBrushedData.domain1 = x.domain()[1]
+                            pastBrushedData.data = data
+
+                            var brushedData = pastBrushedData
+
+                            console.log("Esx 1111" + date1)
+                            console.log("Ex 2222" + date2)
+                            console.log("esx", x(extent[0]))
+                            console.log("exc", x(extent[1]))
 
                             var date3 = new Date(x.invert(extent[0])).toISOString()
                             var date4 = new Date(x.invert(extent[1])).toISOString()
@@ -348,9 +416,10 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                             var date6 = new Date(date4.substring(0, date4.indexOf("T")))
 
                             var numberOfDatesBetweenTheStartingAndEndDate = 0;
-                            var dataset2;
+                            pastBrushedArray.push(brushedData)
+                            console.log("estas são as datas", pastBrushedArray)
 
-                            dataset2 = data.filter(a => {
+                            data = data.filter(a => {
                                 var date = new Date(a._source.pub_date);
                                 return date >= date5 && date <= date6
 
@@ -358,9 +427,10 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
 
 
-                            numberOfDatesBetweenTheStartingAndEndDate = dataset2.length
+                            numberOfDatesBetweenTheStartingAndEndDate = data.length
                             setnumberOfDatesBetweenTheStartingAndEndDate(numberOfDatesBetweenTheStartingAndEndDate)
-                            setLineChartFiltedredNews(dataset2)
+                            setLineChartFiltedredNews(data)
+
 
                             setBrushExtent([date1.substring(0, date1.indexOf(":") - 2), date2.substring(0, date2.indexOf(":") - 2)])
 
@@ -411,9 +481,33 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
                     // If user double click, reinitialize the chart
                     svg.on("dblclick", function () {
-                        x.domain(d3.extent(data, function (d) {
-                            return d3.timeParse("%Y-%m-%d")(d._source.pub_date.substring(0, 10));
-                        }))
+
+                        let domain0;
+                        let domain1;
+
+                        if(pastBrushedArray.length > 1){
+                            var pastBrush = pastBrushedArray.pop()
+                            data = pastBrush.data
+                             domain0 = pastBrush.domain0
+                             domain1 = pastBrush.domain1
+                        }
+
+                        else{
+                            var pastBrush = pastBrushedArray[0]
+                            data = pastBrush.data
+                            domain0 = pastBrush.domain0
+                            domain1 = pastBrush.domain1
+                        }
+
+
+
+
+                        x.domain([domain0, domain1])
+
+                         // x.domain(d3.extent(data, function (d) {
+                         //     return d3.timeParse("%Y-%m-%d")(d._source.pub_date.substring(0, 10));
+                         // }))
+
                         xAxis.transition().call(d3.axisBottom(x))
                         line
                             .select('.line')
@@ -440,23 +534,31 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                                 return y(d._score)
                             })
 
-                        setnumberOfDatesBetweenTheStartingAndEndDate(filteredNews.length);
+                        setnumberOfDatesBetweenTheStartingAndEndDate(data.length);
+                        setLineChartFiltedredNews(data)
                     });
 
 
             //tooltip
-            // const tooltip = d3.select('body').append('div')
-            //     .style('position', 'absolute')
-            //     .style('background', '#f4f4f4')
-            //     .style('padding', '5 15px')
-            //     .style('border', '1px #333 solid')
-            //     .style('border-radius', '5px')
-            //     .style('opacity', '0')
-            //
-            // const tooltip2 = d3.select('body').append("div")
+            const tooltip = d3.select('body').append('div')
+                .attr("class", "tooltip")
+                .style('position', 'absolute')
+                .style('background', '#f4f4f4')
+                .style('padding', '5 15px')
+                .style('border', '1px #333 solid')
+                .style('border-radius', '5px')
+                .style('opacity', '1')
+
+
+
+             const tooltip2 = d3.select('body').append("div")
 
 
             function handleMouseOver(event, d, i) {  // Add interactivity
+
+
+                const informationWidth = (width * 0.01)
+                const informationHeight = (height * 0.02)
 
 
                 d3.select(this)
@@ -464,38 +566,45 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                     .duration(100)
                     .attr('stroke-width', 7)
 
-                //tooltip.transition()
-                //.style('opacity', 1)
-
-
                 svg.select(".score")
-                    .attr("x", 10)
-                    .attr("y", 10)
+                    .attr("x", informationWidth)
+                    .attr("y", informationHeight)
                     .attr("dy", ".35em")
                     .text("Score " + d._score)
 
                 svg.select(".date")
-                    .attr("x", 10)
-                    .attr("y", 22)
+                    .attr("x", informationWidth)
+                    .attr("y", informationHeight * 2.4)
                     .attr("dy", ".35em")
                     .text("Date: " + d._source.pub_date.substring(0, 10))
 
                 svg.select(".keywords")
-                    .attr("x", 10)
-                    .attr("y", 34)
+                    .attr("x", informationWidth)
+                    .attr("y", informationHeight * 3.8)
                     .attr("dy", ".35em")
                     .text("Keywords: " + d._source.keywords.map(keyword => (" " + keyword.value)))
 
                 svg.select(".headline")
-                    .attr("x", 10)
-                    .attr("y", 46)
+                    .attr("x", informationWidth)
+                    .attr("y", informationHeight * 5.2)
                     .attr("dy", ".35em")
                     .text("Headline: " + d._source.headline.main);
 
-                // tooltip.html("<p><b>Number of headlines</b>: " + 126 + "</p> <p><b>Data</b>: " + d.publication_date + "</p>" +
-                //     "<p> Keywords: " +d.Keywords + " </p><p>Topics: Football, Atletism, Sports</p>")
-                //     .style('left', (event.pageX) + 'px')
-                //     .style('top', (event.pageY+ 'px'));
+
+
+                //buscar o lugar da imagem nos dados
+                let imageIndex = 0
+                if(d._source.image_positions.length > 0)
+                    imageIndex = d._source.image_positions[0]
+
+                tooltip.style("opacity", 1)
+                tooltip.html( `<div class="card border-success"
+                    style="width: 220px; z-index: 10; position: absolute;"><div class="carousel slide"
+                    style="border-radius: 50%;"><div class="carousel-indicators"><button type="button" data-bs-target="" aria-label="Slide 1" class="active" aria-current="true"></button></div><div class="carousel-inner"><div class="active carousel-item" style="width: 100%;"><img class="d-block w-100" src="https://large.novasearch.org/nytimes/images/${d._source.parsed_section[imageIndex].hash }.jpg"  alt="First slide" style="width: 100%; height: 100px; object-fit: cover; overflow: hidden;"></div></div><a class="carousel-control-prev" role="button" href="#"><span class="visually-hidden">Previous</span></a><a class="carousel-control-next" role="button" href="#"><span class="visually-hidden">none</span></a></div><div class="card-body"><div class="card-title h5" style="font-size: .95em;"> ${d._source.headline.main} </div><div class="mb-2 text-muted card-subtitle h6" style="font-size: 0.75em;">${d._source.pub_date.substring(0, 10)}</div><p class="card-text" style="font-family: unset; font-size: 0.70em;">${d._source.snippet}</p><a class="card-link" variant="primary" href="pre" style="font-family: arial; font-size: 0.75em; float: right;">See more</a></div></div>`)
+                    .style('left', (event.pageX * 1.02) + 'px')
+                    .style('top', (event.pageY * 1.02 + 'px'))
+
+
 
 
                 // Specify where to put label of text

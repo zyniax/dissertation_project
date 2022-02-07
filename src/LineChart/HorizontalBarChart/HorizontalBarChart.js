@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 
 
 
-export const HorizontalBarChart = ({keywords, filteredNews, setFilteredNews, setLineChartFiltedredNews}) => {
+export const HorizontalBarChart = ({keywords, filteredNews, setFilteredNews, setLineChartFiltedredNews, lineChartFiltedredNews}) => {
 
 
     console.log("estas são as keywords")
@@ -15,6 +15,34 @@ export const HorizontalBarChart = ({keywords, filteredNews, setFilteredNews, set
     const svgRef = useRef();
 
     useEffect(() => {
+
+        let map = new Map();
+        const news_ids = []
+
+        for(let i = 0; i < lineChartFiltedredNews.length; i++){
+
+
+            for(let k = 0; k < lineChartFiltedredNews[i]._source.image_positions.length; k++)
+                news_ids.push(lineChartFiltedredNews[i]._id + "_" + k )
+
+            for(let j = 0; j < lineChartFiltedredNews[i]._source.keywords.length; j++){
+
+                let newsSet = map.get(lineChartFiltedredNews[i]._source.keywords[j].value)
+
+                if(newsSet != undefined)
+                    newsSet.push(i)
+                else
+                    newsSet = [i]
+
+                map.set(lineChartFiltedredNews[i]._source.keywords[j].value, newsSet)
+                map[Symbol.iterator] = function* () {
+                    yield* [...map.entries()].sort((a, b) => b[1].length - a[1].length);
+                }
+            }
+        }
+
+        const obj = Object.fromEntries(map);
+        keywords = Object.entries(obj).slice(0, 10)
 
 
         // set the dimensions and margins of the graph
@@ -96,7 +124,7 @@ export const HorizontalBarChart = ({keywords, filteredNews, setFilteredNews, set
         }
 
 
-    }, [keywords]);
+    }, [keywords, lineChartFiltedredNews]);
 
 
 

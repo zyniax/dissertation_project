@@ -15,7 +15,7 @@ export const ColapsibleGraphVisualization = ({}) => {
 
         axios.get('http://localhost:3000/api/request/umap', {
             headers: {
-                'Access-Control-Allow-Origin': 'http://localhost:3000',
+                'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
                 'Access-Control-Allow-Headers': 'application/json'
             }

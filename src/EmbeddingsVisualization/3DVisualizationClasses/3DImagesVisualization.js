@@ -551,7 +551,7 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
 
                     axios.get('http://localhost:3000/api/request/umap3D',{
                         headers: {
-                            'Access-Control-Allow-Origin': 'http://localhost:3000',
+                            'Access-Control-Allow-Origin': '*',
                             'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
                             'Access-Control-Allow-Headers': 'application/json'
                         }
@@ -1325,10 +1325,7 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
 
     return(
         <>
-
-
-
-            <div key = {key} ref={ref} style={{width: '100px', height: '100px', position:'relative'}}>
+            <div id={"threeDImageVisualization"} key = {key} ref={ref} style={{width: '100px', height: '100px', position:'relative'}}>
                 {clickedImage!= "" ? (<div id="overlay">
                     <Card border="secondary" key={1}  style={{width: '220px', marginTop: '15px', marginLeft: '15px'}}>
                         <Carousel nextLabel='none' nextIcon= '' prevIcon='' style={{borderRadius: '50%'}} interval={null}>

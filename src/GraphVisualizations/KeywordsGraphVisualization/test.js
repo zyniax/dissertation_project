@@ -3,14 +3,73 @@ import * as d3 from "d3";
 import "./test.css"
 import {Card, Carousel, Col} from "react-bootstrap";
 import axios from "axios";
+import {BsImage} from "react-icons/bs";
+import {ImNewspaper} from "react-icons/im";
 
-export const Test = ({selectedNewsId}) => {
+export const Test = ({selectedNewsId, setSelectedNewsId, setSelectedNews, setFilteredNews, setKeywords, setThreeDImageData, setLineChartFiltedredNews, selectedNews, pastResultSearchNews, setPastResultSearchNews, setSearchTermHistory}) => {
 
     const [mouseOverNews, setMouseOverNews] = useState("")
-    const [pre, setpre] = useState("53f6264a38f0d821a37b1d89")
+    const [index, setIndex] = useState(0);
+
+    const handleSelect = (selectedIndex, e) => {
+        setIndex(selectedIndex);
+    };
 
     const svgRef = useRef();
     let firstRender = true;
+
+
+    const handleMultiModalMouseClickRequest = (news) => {
+
+
+        const news_id = news._id + "_" + news._source.parsed_section[news._source.image_positions[index]].order
+
+        //https://dissertationserver.herokuapp.com/
+        axios.get('http://localhost:3000/api/request/search/' + news_id ,{
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+                'Access-Control-Allow-Headers': 'application/json'
+            }
+        }).then(response =>{
+
+
+            setKeywords(response.data.keywords)
+            setThreeDImageData(response.data)
+            setFilteredNews(response.data.searchWordResult.body.hits.hits)
+            setLineChartFiltedredNews(response.data.searchWordResult.body.hits.hits)
+            setSelectedNewsId(response.data.searchWordResult.body.hits.hits[0]._id + "_" + response.data.searchWordResult.body.hits.hits[0]._source.parsed_section[response.data.searchWordResult.body.hits.hits[0]._source.image_positions[0]].order)
+            pastResultSearchNews.push(response.data.searchWordResult.body.hits.hits)
+            setPastResultSearchNews(pastResultSearchNews)
+
+        })
+    }
+
+    const handleVisualMouseClickRequest = (news) => {
+
+
+        const news_id = news._id + "_" + news._source.parsed_section[news._source.image_positions[index]].order
+
+        //https://dissertationserver.herokuapp.com
+        axios.get('http://localhost:3000/api/request/ByImage/' + news_id ,{
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+                'Access-Control-Allow-Headers': 'application/json'
+            }
+        }).then(response =>{
+
+
+            setKeywords(response.data.keywords)
+            setThreeDImageData(response.data)
+            setFilteredNews(response.data.searchWordResult.body.hits.hits)
+            setLineChartFiltedredNews(response.data.searchWordResult.body.hits.hits)
+            setSelectedNewsId(response.data.searchWordResult.body.hits.hits[0]._id + "_" + response.data.searchWordResult.body.hits.hits[0]._source.parsed_section[response.data.searchWordResult.body.hits.hits[0]._source.image_positions[0]].order)
+            pastResultSearchNews.push(response.data.searchWordResult.body.hits.hits)
+            setPastResultSearchNews(pastResultSearchNews)
+
+        })
+    }
 
     useEffect(() => {
 
@@ -21,11 +80,12 @@ export const Test = ({selectedNewsId}) => {
         if(selectedNewsId != undefined && selectedNewsId != "") {
 
 
+
             console.log("este é o clickedNews", selectedNewsId)
 
             axios.get('http://localhost:3000/api/request/umap/' + selectedNewsId, {
                 headers: {
-                    'Access-Control-Allow-Origin': 'http://localhost:3000',
+                    'Access-Control-Allow-Origin': '*',
                     'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
                     'Access-Control-Allow-Headers': 'application/json'
                 }
@@ -296,6 +356,9 @@ export const Test = ({selectedNewsId}) => {
                         }
                     ]
                 }
+                //let svg = d3.select(svgRef.current)
+
+
 
 
                 // eslint-disable-next-line no-restricted-globals
@@ -303,71 +366,29 @@ export const Test = ({selectedNewsId}) => {
                     // eslint-disable-next-line no-restricted-globals
                     height = (innerHeight * 0.60);
 
-                let i = 0;
-                let node, link, edgepaths, root, halo, nodes;
+                let svg = d3.select(svgRef.current)
+                svg.selectAll('.svg').remove();
 
-
-                root = d3.hierarchy(response.data.root);
-                nodes = flatten(root)
-                const transform = d3.zoomIdentity;
-
-
-                const svg = d3.select(svgRef.current).append('svg')
+                svg = d3.select(svgRef.current)
+                    .append('svg')
+                    .attr("class", 'svg')
                     .attr("width", width)
                     .attr("height", height)
                     .call(d3.zoom().scaleExtent([1 / 2, 8]).on('zoom', zoomed))
                     .append('g')
                     .attr('transform', 'translate(40,0)');
 
-                // ver isto melhor, pode ser que dê problema mais para a frente
-                // svg.append('defs').append('marker')
-                //     .attr("id", 'arrowhead')
-                //     .attr('viewBox', '-0 -5 10 10') //the bound of the SVG viewport for the current SVG fragment. defines a coordinate system 10 wide and 10 high starting on (0,-5)
-                //     .attr('refX', 38) // x coordinate for the reference point of the marker. If circle is bigger, this need to be bigger.
-                //     .attr('refY', 0)
-                //     .attr('orient', 'auto')
-                //     .attr('markerWidth', 13)
-                //     .attr('markerHeight', 13)
-                //     .attr('xoverflow', 'visible')
-                //     .append('svg:path')
-                //     .attr('d', 'M 0,-5 L 10 ,0 L 0,5')
-                //     .attr('fill', 'red')
-                //     .style('stroke', 'none');
 
 
-                // const simulation = d3.forceSimulation()
-                //     .force('link', d3.forceLink().id(function(d) { return d.id; }))
-                //     .force('charge', d3.forceManyBody().strength(-3500).distanceMax(200))
-                //     .force('center', d3.forceCenter( width/2, height/4 ))
-                //     .on('tick', ticked)
+                let i = 0;
+                let node, link, edgepath, root, halo, nodes;
 
-                // const simulation = d3
-                //     .forceSimulation()
-                //     // Allocate coordinates for the vertices
-                //     //.nodes(data.vertexes)
-                //     // Link
-                //     .force('link', d3.forceLink(root.links()))
-                //     // For setting the center of gravity of the system
-                //     .force('center', d3.forceCenter(width / 2, height / 2))
-                //     // The gravity
-                //     .force('charge', d3.forceManyBody().strength(-3500))
-                //     // The collision force, for preventing the vertices from overlapping
-                //     .force('collide', d3.forceCollide().radius(100).iterations(20))
-                //     .on('tick', ticked)
+
+                root = d3.hierarchy(response.data.root);
+                nodes = flatten(root)
 
                 var linkForce = d3.forceLink(root.links()).distance((link) => (link.target.isLeaf || link.target.isLeaf == undefined) ? 40 : 350).iterations(30)
-                // const simulation = d3
-                //     .forceSimulation()
-                //     // Assign coordinates to nodes
-                //     // Connect edges
-                //     .force('link', linkForce)
-                //     // The instance center
-                //     .force('center', d3.forceCenter(width / 2, height / 2))
-                //     // Gravitation
-                //     .force('charge', d3.forceManyBody().strength(-90).distanceMax(50))
-                //     // Collide force to prevent nodes overlap
-                //     .force('collide',d3.forceCollide().radius(50).iterations(2))
-                //     .on('tick', ticked);
+
 
                 const simulation = d3
                     .forceSimulation()
@@ -386,6 +407,7 @@ export const Test = ({selectedNewsId}) => {
 
                 svg.append("g").attr("class", "links");
                 svg.append("g").attr("class", "nodes");
+                svg.append("g").attr("class", "edgePaths")
 
 
                 function update() {
@@ -413,44 +435,56 @@ export const Test = ({selectedNewsId}) => {
                         .style('stroke', "#aaa")
                         .attr('marker-end', 'url(#arrowhead)')
 
-                    edgepaths = svg.selectAll(".edgepath") //make path go along with the link provide position for link labels
+                    edgepath = svg
+                        .select(".edgePaths")
+                        .selectAll(".edgepath") //make path go along with the link provide position for link labels
                         .data(links, function (d) {
                             return d.target.id
                         })
-                        .enter()
-                        .append('path')
-                        .attr('class', 'edgepath')
-                        .attr('fill-opacity', 0)
-                        .attr('stroke-opacity', 0)
-                        .attr('id', function (d, i) {
-                            return 'edgepath' + i
-                        })
-                        .style("pointer-events", "none");
 
-                    const edgelabels = svg.selectAll(".edgelabel")
-                        .data(links, function (d) {
-                            return d.target.id
-                        })
+                    edgepath.exit().remove()
+
+                        const edgeEnter = edgepath
                         .enter()
+                        .append("g")
+                        .attr('class', 'edgepath')
+
+
+
+                    edgeEnter
+                       .append('path')
+                       .attr('class', 'path')
+                       .attr('fill-opacity', 0)
+                       .attr('stroke-opacity', 0)
+                       .attr('id', function (d, i) {
+                            return 'edgepath' + i
+                            })
+                       .style("pointer-events", "none");
+
+
+                    edgeEnter
                         .append('text')
                         .style("pointer-events", "none")
                         .attr('class', 'edgelabel')
                         .attr('id', function (d, i) {
                             return 'edgelabel' + i
                         })
-                        .attr('font-size', 14)
-                        .attr('fill', '#aaa');
 
-                    edgelabels.append('textPath') //To render text along the shape of a <path>, enclose the text in a <textPath> element that has an href attribute with a reference to the <path> element.
+                    edgeEnter
+                        .select(".edgelabel")
+                        .append('textPath') //To render text along the shape of a <path>, enclose the text in a <textPath> element that has an href attribute with a reference to the <path> element.
                         .attr('xlink:href', function (d, i) {
                             return '#edgepath' + i
                         })
                         .style("text-anchor", "middle")
                         .style("pointer-events", "none")
+                        .style("font-size", "10")
                         .attr("startOffset", "50%")
                         .attr("x", 10)
                         .attr("y", 10)
-                        .text("has");
+                        .text(function (d, i) {
+                            return ""
+                        });
 
 
                     link = linkEnter.merge(link)
@@ -475,16 +509,16 @@ export const Test = ({selectedNewsId}) => {
                         .style('opacity', 1)
                         .on('click', clicked)
                         .on('mouseover', function (event, d) {
-                            setMouseOverNews(d.data.news._source)
-
-                            if (d.children == false && d._children == false)
-                                d3.select(this).select(".haloCircle").remove()
+                            setMouseOverNews(d.data.news)
+                            setIndex(0)
 
                             if (!d.children)
                                 d3.select(this).select(".haloCircle").transition().duration(500).attr("r", 40)
 
                             else
                                 d3.select(this).select(".haloCircle").transition().duration(500).attr("r", 37)
+
+
                         })
                         .on('mouseout', function (event, d) {
 
@@ -515,6 +549,12 @@ export const Test = ({selectedNewsId}) => {
                         .attr("class", "haloCircle")
                         .style('stroke-dasharray', ("5,3"))
                         .style("stroke", function (d) {
+                            //console.log("este é o d", d3.select(this.parentNode).select("circle").style("fill"))
+
+                            if(d3.select(this.parentNode).select("circle").style("fill") == d3.color("red"))
+                                d3.select(this).remove()
+
+
                             return d == root ? "#248f24" : "#1888ff";
                         })   // set the line colour
                         .style("stroke-width", 1)
@@ -530,6 +570,8 @@ export const Test = ({selectedNewsId}) => {
                         .style("font-size", "10")
                         .style('fill', 'black')
                         .text(function (d, i) {
+                           //return d.data.news._source.headline.main
+                            console.log("dados das noticias",d)
                             if (d.data.news._source.keywords.length > 0)
                                 return d.data.news._source.keywords[0].value
                             return "none"
@@ -548,7 +590,10 @@ export const Test = ({selectedNewsId}) => {
                                 return parseInt(d.data.similarity * 100) + "%"
                         })
 
+
+
                     node = nodeEnter.merge(node)
+                    edgepath = edgeEnter.merge(edgepath)
                     simulation.nodes(nodes)
                     simulation.force('link').links(links)
 
@@ -559,11 +604,12 @@ export const Test = ({selectedNewsId}) => {
                                 nodes[i].children = null;
                             }
 
-                        firstRender = false
-                        update()
+                         firstRender = false
+                         update()
                     }
 
                 }
+
 
                 function sizeContain(num) {
                     num = num > 1000 ? num / 1000 : num / 100
@@ -572,6 +618,8 @@ export const Test = ({selectedNewsId}) => {
                 }
 
                 function color(d) {
+
+
                     return d == root ? "#248f24" :
                         d._children ? "#1888ff" // collapsed package
                             : d.children ? "#1888ff" // expanded package
@@ -604,7 +652,8 @@ export const Test = ({selectedNewsId}) => {
                             return `translate(${d.x}, ${d.y})`
                         })
 
-                    edgepaths
+                    edgepath
+                        .select(".path")
                         .attr('d', d => 'M ' + d.source.x + ' ' + d.source.y + ' L ' + d.target.x + ' ' + d.target.y);
                 }
 
@@ -682,16 +731,17 @@ export const Test = ({selectedNewsId}) => {
 
     return (
         <div ref={svgRef} style={{ position:'relative'}} >
-            <div id="pre">
+            <div >
                 {mouseOverNews != "" &&
                 <Card border="success" key={1}  style={{width: '220px', marginTop: '15px', marginLeft: '15px', zIndex: '10', position:'absolute'}}>
-                    <Carousel nextLabel='none' nextIcon= '' prevIcon='' style={{borderRadius: '50%'}} interval={null}>
-                        {mouseOverNews.image_positions.map (imageIndex => (
-                            <Carousel.Item style={{width:'100%'}}  >
-                                <img
+                    <Carousel nextLabel='none' nextIcon= '' prevIcon='' style={{borderRadius: '50%'}} interval={null} activeIndex={index} onSelect={handleSelect}>
+                        {mouseOverNews._source.image_positions.map (imageIndex  => (
+                            <Carousel.Item style={{width:'100%'}}>
+                                <img onClick={() =>
+                                {setSelectedNewsId(mouseOverNews._id + "_" + mouseOverNews._source.parsed_section[imageIndex].order);  setSelectedNews(mouseOverNews)} }
                                      style={{width:'100%', height:'165px', objectFit: "cover", overflow: "hidden"}}
                                      className="d-block w-100"
-                                     src={"https://large.novasearch.org/nytimes/images/" + mouseOverNews.parsed_section[imageIndex].hash + ".jpg"}
+                                     src={"https://large.novasearch.org/nytimes/images/" + mouseOverNews._source.parsed_section[imageIndex].hash + ".jpg"}
                                      alt="First slide"
                                 />
                             </Carousel.Item>))}
@@ -699,12 +749,24 @@ export const Test = ({selectedNewsId}) => {
 
 
                     <Card.Body >
-                        <Card.Title  > {mouseOverNews.headline.main} </Card.Title>
-                        <Card.Subtitle className="mb-2 text-muted">{mouseOverNews.pub_date.substring(0,10)}</Card.Subtitle>
+                        <Card.Title  > {mouseOverNews._source.headline.main} </Card.Title>
+                        <Card.Subtitle className="mb-2 text-muted">{mouseOverNews._source.pub_date.substring(0,10)}</Card.Subtitle>
                         <Card.Text style={{fontFamily: "unset", fontSize: "0.75em"}}>
-                            {mouseOverNews.snippet}
+                            {mouseOverNews._source.snippet}
                         </Card.Text>
                         <Card.Link style={{fontFamily: "arial", fontSize: "0.75em", float:"right"}} variant="primary" href={"pre"}>See more</Card.Link>
+
+                        <BsImage onClick={() => {handleVisualMouseClickRequest(mouseOverNews, index); setSearchTermHistory(searchTermHistory => [...searchTermHistory, mouseOverNews._source.headline.main + " (image)"])}}
+                                 style={{width:'15%', height:'27px', objectFit: "cover", overflow: "hidden", float:"left"}}
+                        />
+                        <ImNewspaper onClick={() => {handleMultiModalMouseClickRequest(mouseOverNews, index); setSearchTermHistory(searchTermHistory => [...searchTermHistory, mouseOverNews._source.headline.main + " (text)"])}}
+                                     style={{width:'15%', height:'29px', objectFit: "cover", overflow: "hidden", float:"left"}}
+
+                        />
+                        <ImNewspaper onClick={() => {handleMultiModalMouseClickRequest(mouseOverNews, index); setSearchTermHistory(searchTermHistory => [...searchTermHistory, mouseOverNews._source.headline.main + " (text)"])}}
+                                     style={{width:'15%', height:'29px', objectFit: "cover", overflow: "hidden", float:"left"}}
+
+                        />
                     </Card.Body>
                 </Card> }
             </div>
