@@ -13,14 +13,131 @@ import {Card, Carousel} from "react-bootstrap";
 import {FlakesTexture} from "three/examples/jsm/textures/FlakesTexture";
 import {RGBELoader} from "three/examples/jsm/loaders/RGBELoader";
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {Button} from "primereact/button";
+import {ImNewspaper} from "react-icons/im";
+import {BsImage} from "react-icons/bs";
 
 
 
-export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
+
+export const ThreeDImageVisualization = ({threeDImageData, applicationState, setApplicationState, pastApplicationState, pastNodeEdges, pastNodes, pastResultSearchNews, pastWordToNewsMap, setFilteredNews, setInitialFilteredNews, setKeywords, setLineChartFiltedredNews, setnodeEdges, setNodes, setPastApplicationState, setPastNodeEdges, setPastNodes, setPastResultSearchNews, setPastWordToNewsMap, setSearchTermHistory, setSelectedNewsId, setThreeDImageData, setWordsToNews}) => {
 
     const ref = useRef();
     let imageIndex = 0
     const [clickedImage, setClickedImage] = useState("")
+    const [index, setIndex] = useState(0);
+
+    const handleSelect = (selectedIndex, e) => {
+        setIndex(selectedIndex);
+    };
+
+    const handleMultimodalClickRequest = (news) => {
+
+
+        const news_id = news._id + "_" + news._source.parsed_section[news._source.image_positions[index]].order
+
+        //https://dissertationserver.herokuapp.com/
+        axios.get('http://localhost:3000/api/request/similarNews/byText/' + news_id ,{
+            params: {
+                state: applicationState,
+                new_interaction:{"op": "text", "results": [{ "id": "0", "score": 1.70}, { "id": "1", "score": 2.70}]},
+            },
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+                'Access-Control-Allow-Headers': 'application/json'
+            }
+        }).then(response =>{
+
+
+            setInitialFilteredNews(response.data.searchWordResult.body.hits.hits)
+            setnodeEdges(response.data.edges)
+            setNodes(response.data.nodes)
+            setKeywords(response.data.keywords)
+            setThreeDImageData(response.data)
+            setFilteredNews(response.data.searchWordResult.body.hits.hits)
+            setLineChartFiltedredNews(response.data.searchWordResult.body.hits.hits)
+            setSelectedNewsId(response.data.searchWordResult.body.hits.hits[0]._id + "_" + response.data.searchWordResult.body.hits.hits[0]._source.parsed_section[response.data.searchWordResult.body.hits.hits[0]._source.image_positions[0]].order)
+            pastResultSearchNews.push(response.data.searchWordResult.body.hits.hits)
+            setPastResultSearchNews(pastResultSearchNews)
+
+            const wordsToNewsMap = new Map(Object.entries(response.data.wordToNewsMap));
+            setWordsToNews(wordsToNewsMap)
+
+            applicationState = response.data.state.state
+            console.log("resposnsestate", applicationState)
+            setApplicationState(applicationState)
+
+
+            pastNodes.push(response.data.nodes)
+            pastNodeEdges.push(response.data.edges)
+            pastWordToNewsMap.push(wordsToNewsMap)
+            pastApplicationState.push(applicationState)
+
+            setPastNodes(pastNodes)
+            setPastNodeEdges(pastNodeEdges)
+            setPastWordToNewsMap(pastWordToNewsMap)
+            setPastApplicationState(pastApplicationState)
+
+        })
+    }
+
+    const handleImageMouseClickRequest = (news) => {
+
+
+
+
+        const news_id = news._id + "_" + news._source.parsed_section[news._source.image_positions[index]].order
+
+        //https://dissertationserver.herokuapp.com
+        axios.get('http://localhost:3000/api/request/similarNews/byImage/' + news_id ,{
+            params: {
+                state: applicationState,
+                new_interaction:{"op": "text", "results": [{ "id": "0", "score": 1.70}, { "id": "1", "score": 2.70}]},
+            },
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+                'Access-Control-Allow-Headers': 'application/json'
+            }
+        }).then(response =>{
+
+
+            console.log("datad2", response.data)
+            setInitialFilteredNews(response.data.searchWordResult.body.hits.hits)
+            setnodeEdges(response.data.edges)
+            setNodes(response.data.nodes)
+            setKeywords(response.data.keywords)
+            setThreeDImageData(response.data)
+            setFilteredNews(response.data.searchWordResult.body.hits.hits)
+            setLineChartFiltedredNews(response.data.searchWordResult.body.hits.hits)
+            setSelectedNewsId(response.data.searchWordResult.body.hits.hits[0]._id + "_" + response.data.searchWordResult.body.hits.hits[0]._source.parsed_section[response.data.searchWordResult.body.hits.hits[0]._source.image_positions[0]].order)
+            pastResultSearchNews.push(response.data.searchWordResult.body.hits.hits)
+            setPastResultSearchNews(pastResultSearchNews)
+
+            const wordsToNewsMap = new Map(Object.entries(response.data.wordToNewsMap));
+            setWordsToNews(wordsToNewsMap)
+
+            applicationState = response.data.state.state
+            console.log("resposnsestate", applicationState)
+            setApplicationState(applicationState)
+
+
+            pastNodes.push(response.data.nodes)
+            pastNodeEdges.push(response.data.edges)
+            pastWordToNewsMap.push(wordsToNewsMap)
+            pastApplicationState.push(applicationState)
+
+            setPastNodes(pastNodes)
+            setPastNodeEdges(pastNodeEdges)
+            setPastWordToNewsMap(pastWordToNewsMap)
+            setPastApplicationState(pastApplicationState)
+
+
+
+
+        })
+    }
 
 
     let sceneSpheres = [];
@@ -34,24 +151,17 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
 
 
 
+
+
     useEffect(()=>{
 
-        console.log("wste é o threedimage data")
-        console.log(threeDImageData)
+        console.log("jkl")
 
         if(threeDImageData.length != 0){
 
 
-
             key++;
             const response = threeDImageData
-        // axios.get('http://localhost:3000/api/request/umap3D',{
-        //     headers: {
-        //         'Access-Control-Allow-Origin': 'http://localhost:3000',
-        //         'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
-        //         'Access-Control-Allow-Headers': 'application/json'
-        //     }
-        // }).then(response => {
 
             const scene = new THREE.Scene();
             const camera = new THREE.PerspectiveCamera(
@@ -131,7 +241,7 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
                     texture.magFilter = THREE.LinearFilter;
                     texture.minFilter = THREE.LinearFilter;
 
-                    const geometry = new THREE.PlaneGeometry(4, 4, 1);
+                    const geometry = new THREE.PlaneGeometry(12, 12, 1);
                     const material = new THREE.MeshBasicMaterial({map: texture});
 
                     const plane= new THREE.Mesh(geometry, material);
@@ -187,7 +297,7 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
                 console.log("este é o intersects")
                 console.log(intersects)
 
-                // se a interseção for maior do que 1 significa que clicou na esfera opaca e na fotografia com um só clique, ou seja o clique apanha tanto a esfera opaca como a fotografia
+                // se a interseção for maior do que 1 significa que clicou na esfera opaca e na fotografia com um só clique, ou seja, o clique apanha tanto a esfera opaca como a fotografia
                 if(intersects.length > 1 && intersects[1].object.geometry.type === 'PlaneGeometry' && intersects[0].object.geometry.type === 'SphereGeometry' && intersects[0].object.visible === false)
                     flyToObject(intersects[1].object)
 
@@ -265,12 +375,15 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
 
 
                 if (intersects.length > 0) {
-                    currentObject = intersects[0].object;
-                    //arrowHelper.cone.material.opacity = 0
 
-                    if (intersects[0].object.geometry.type === 'PlaneGeometry'){
+                    for(let i = 0; i < intersects.length; i++){
+
+
+
+                    console.log("intersects", intersects)
+                    if (intersects[i].object.geometry.type === 'PlaneGeometry'){
                         //console.log(intersects[0] + "    " + threeDImageData.newsIds.length)
-                        const indexOfImage = intersects[0].object.indexOfImage
+                        const indexOfImage = intersects[i].object.indexOfImage
                         const newsIdAndImagePosition =  threeDImageData.newsIds[indexOfImage]
 
                         const newsId = newsIdAndImagePosition.split("_")[0]
@@ -289,14 +402,13 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
                                     console.log("true")
                                     console.log(news[l])
                                     console.log(newsImageAndIndex)
-                                }
-
+                                 }
+                         }
                         }
                     }
 
-                        //setClickedImage("https://www.palpitedigital.com/y/5327/imagens-google-e1604596848141.jpg")
 
-                    if (intersects[0].object.geometry.type === 'SphereGeometry'){
+                    if (intersects[0].object.geometry.type === 'SphereGeometry' && intersects[0].object.visible == true){
                         const newsLinks = ["https://madre.com.pt/wp-content/uploads/2021/07/IMG_8004-scaled.jpg", "https://www.jcs.pt/upload/1457541812.jpg", "https://www.fccnn.com/news/article769232.ece/alternates/BASE_LANDSCAPE/2222824%2Bfire.jpg", "https://wwmt.com/resources/media2/16x9/full/1015/center/80/7d7ef12f-5b4b-450c-af92-bd5a341a649e-large16x9_FIREGENERIC.png"]
 
                         const random = Math.floor(Math.random() * newsLinks.length);
@@ -333,6 +445,8 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
 
             function onMouseWheel(event) {
 
+
+
                 // zoom out
                 if(event.wheelDelta>0){
 
@@ -350,7 +464,7 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
                             //console.log(object)
                             //console.log(sceneSpheres[i])
                         }
-                        if(sceneSpheres[i].visible == false){
+                        if(sceneSpheres[i].visible == false && sceneSpheres[i].clicked == true){
 
                             const indexesOfImagesInsideSphere = sceneSpheres[i].pointsIndexes
 
@@ -359,15 +473,11 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
 
                                 console.log(threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2])
                                 console.log(threeDImageData.embeddings[indexesOfImagesInsideSphere])
-                                if(camera.position.z - (threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier) < 15 && createdPlanes[i][j].showingHighQualityImage == false ){
+                                if(camera.position.z - (threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier) < 50 && createdPlanes[i] != undefined && createdPlanes[i][j] != undefined && createdPlanes[i][j].showingHighQualityImage == false ){
 
 
 
-                                console.log("llllllllllllllllllllllllllll entrei no high")
-
-
-
-                                        const geometry = new THREE.PlaneGeometry(4, 4, 1);
+                                        const geometry = new THREE.PlaneGeometry(12, 12, 1);
                                         const texture = new THREE.TextureLoader().load('./pre_highQuality/transferir.jpg');
                                         //const texture = new THREE.CanvasTexture(imageBitmap);
 
@@ -400,7 +510,7 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
 
                                     console.log("pre3")
                                 }
-                                 if(camera.position.z - (threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier) < 35 && createdPlanes[i][j].showingMediumQualityImage == false  && createdPlanes[i][j].showingHighQualityImage == false){
+                                 if(camera.position.z - (threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier) < 120 && createdPlanes[i] != undefined && createdPlanes[i][j] != undefined && createdPlanes[i][j].showingMediumQualityImage == false  && createdPlanes[i][j].showingHighQualityImage == false){
 
 
                                     console.log("kkkkkkkkkkkkkkkkkkkkkkk entrei no medium")
@@ -414,7 +524,7 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
 
 
 
-                                    const geometry = new THREE.PlaneGeometry(4, 4, 1);
+                                    const geometry = new THREE.PlaneGeometry(12, 12, 1);
                                     const texture = new THREE.TextureLoader().load('./pre_mediumQuality/003d3159614e83d323610c2613bd93d21b1732affed6a642bc6338094a9c42cf-min.jpg');
                                     //const texture = new THREE.CanvasTexture(imageBitmap);
 
@@ -464,47 +574,66 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
                             // smallSphere.position.set(camera.position.x, camera.position.y + updatedHeightFov/2, sceneSpheres[i].z)
                             // scene.add(smallSphere)
 
-                            if(sceneSpheres[i].visible == false){
+                            if(sceneSpheres[i].visible == false && sceneSpheres[i].clicked == true){
 
                                 const indexesOfImagesInsideSphere = sceneSpheres[i].pointsIndexes
                                 console.log("entrei na parte das bolas brancas")
                                 console.log(sceneSpheres[i].pointsIndexes)
 
-                                for(let j = createdPlanes[i].length; j > 0; j--){
-                                    const planeMesh = createdPlanes[i].pop()
-                                    //console.log(planeMesh)
-                                    planeMesh.geometry.dispose();
-                                    planeMesh.material.dispose();
-                                    texture.dispose();
-                                    scene.remove(planeMesh);
-                                    //scene.dispose(createdPlanes.pop().geometry.dispose())
-                                    //scene.dispose(createdPlanes.pop().material.dispose())
-                                    //scene.remove(createdPlanes.pop())
-                                    //console.log(sceneChildrens[j])
+
+                                for(let p = 0; p < createdPlanes.length; p++){
+
+
+                                    if(createdPlanes[p] != undefined)
+                                    for (let j = createdPlanes[p].length; j > 0; j--) {
+                                        const planeMesh = createdPlanes[p].pop()
+                                        //console.log(planeMesh)
+                                        planeMesh.geometry.dispose();
+                                        planeMesh.material.dispose();
+                                        texture.dispose();
+                                        scene.remove(planeMesh);
+                                        //scene.dispose(createdPlanes.pop().geometry.dispose())
+                                        //scene.dispose(createdPlanes.pop().material.dispose())
+                                        //scene.remove(createdPlanes.pop())
+                                        //console.log(sceneChildrens[j])
+                                    }
                                 }
 
-                                // for(let i = 0; i < indexesOfImagesInsideSphere.length; i++){
-                                //     //const texture = new THREE.TextureLoader().load('https://large.novasearch.org/nytimes/images/206cd0c3321f129171d53aca579372662e99b8f946c01d27c42e10a8daf42f47.jpg');
-                                //     const geometry = new THREE.SphereGeometry(2, 100, 1);
-                                //     const material = new THREE.MeshBasicMaterial({color: "white"});
-                                //     const smallSphere = new THREE.Mesh(geometry, material);
-                                //     smallSphere.position.set(threeDImageData.embeddings[indexesOfImagesInsideSphere[i]][0] * widthMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[i]][1] * heightMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[i]][2] * depthMultiplier)
-                                //     scene.add(smallSphere)
-                                //
-                                // }
-                                sceneSpheres[i].visible = true
+                                    // for(let i = 0; i < indexesOfImagesInsideSphere.length; i++){
+                                    //     //const texture = new THREE.TextureLoader().load('https://large.novasearch.org/nytimes/images/206cd0c3321f129171d53aca579372662e99b8f946c01d27c42e10a8daf42f47.jpg');
+                                    //     const geometry = new THREE.SphereGeometry(2, 100, 1);
+                                    //     const material = new THREE.MeshBasicMaterial({color: "white"});
+                                    //     const smallSphere = new THREE.Mesh(geometry, material);
+                                    //     smallSphere.position.set(threeDImageData.embeddings[indexesOfImagesInsideSphere[i]][0] * widthMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[i]][1] * heightMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[i]][2] * depthMultiplier)
+                                    //     scene.add(smallSphere)
+                                    //
+                                    // }
 
+                                    //sceneSpheres.forEach(sphere => sphere.visible = true)
 
 
                             }
+                            sceneSpheres[i].visible = true
+                            sceneSpheres[i].clicked = false
                         }
                     }
                 }
 
             }
 
+            var hasBeenFixed = false
 
-            document.addEventListener( 'mousewheel', onMouseWheel, false );
+            window.addEventListener( 'mousewheel', onMouseWheel, false );
+            window.addEventListener("", fixTrackBalls, false)
+            //
+            function fixTrackBalls(){
+                if(!hasBeenFixed){
+                    console.log("ABCD")
+                    controls = new TrackballControls(camera, renderer.domElement);
+                    defineTrackballControlsSettings()
+                }
+                hasBeenFixed = true
+            }
 
 
 
@@ -518,17 +647,17 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
             const raycaster = new THREE.Raycaster();
             const mouse = new THREE.Vector2();
 
-            function dbclick( event ) {
-
-                // calculate mouse position in normalized device coordinates
-                // (-1 to +1) for both components
-                let canvasBounds = renderer.domElement.getBoundingClientRect();
-                mouse.x = ( ( event.clientX - canvasBounds.left ) / ( canvasBounds.right - canvasBounds.left ) ) * 2 - 1;
-                mouse.y = - ( ( event.clientY - canvasBounds.top ) / ( canvasBounds.bottom - canvasBounds.top) ) * 2 + 1;
-
-                window.requestAnimationFrame(render);
-
-            }
+            // function dbclick( event ) {
+            //
+            //     // calculate mouse position in normalized device coordinates
+            //     // (-1 to +1) for both components
+            //     let canvasBounds = renderer.domElement.getBoundingClientRect();
+            //     mouse.x = ( ( event.clientX - canvasBounds.left ) / ( canvasBounds.right - canvasBounds.left ) ) * 2 - 1;
+            //     mouse.y = - ( ( event.clientY - canvasBounds.top ) / ( canvasBounds.bottom - canvasBounds.top) ) * 2 + 1;
+            //
+            //     window.requestAnimationFrame(render);
+            //
+            // }
 
             function render() {
 
@@ -571,7 +700,7 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
 
             }
 
-            window.addEventListener( 'dblclick', dbclick, false );
+            //window.addEventListener( 'dblclick', dbclick, false );
             //window.addEventListener('mouseover', ohHover, false);
 
 
@@ -1018,7 +1147,7 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
 
                         // onLoad callback
 
-                    const geometry = new THREE.PlaneGeometry(4, 4, 1);
+                    const geometry = new THREE.PlaneGeometry(12, 12, 1);
                     const texture = new THREE.TextureLoader().load('./pre_badQuality/003d3159614e83d323610c2613bd93d21b1732affed6a642bc6338094a9c42cf-min.jpg');
 
                             // texture.magFilter = THREE.LinearFilter;
@@ -1161,8 +1290,13 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
                     camera.quaternion.set(q.x, q.y, q.z, q.w);
                     controls.target = new THREE.Vector3(c.x, c.y, zMin);
                     controls.update();
-                    if(clickedObject.geometry.type === 'SphereGeometry')
-                        clickedObject.visible = false
+                    if(clickedObject.geometry.type === 'SphereGeometry'){
+
+                        sceneSpheres.forEach(sphere =>( sphere.visible = false))
+                        clickedObject.clicked = true
+                        removeAdditionalKeywordsInSpheres();
+                    }
+
                     //camera.position.set(0, 0 ,1000)
                     // camera.translateX(controls.target.x)
                     // camera.translateY(controls.target.y)
@@ -1234,6 +1368,8 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
 
 
 
+
+
             function defineTrackballControlsSettings(){
 
                 controls.zoomSpeed = 0.3;
@@ -1266,6 +1402,9 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
             let updatedVFOV = initialVFOV
             let updatedHeightFov = initialHeightFov
             let updatedInitialWidthFov = initialwidthFov
+
+            console.log("HEIGHT DESTA TRETA", renderer.domElement.height)
+            console.log("WIDTH DESTA TRETA", renderer.domElement.width)
 
             function updateHelperPosition() {
 
@@ -1323,6 +1462,7 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
 
     },[threeDImageData])
 
+
     return(
         <>
             <div id={"threeDImageVisualization"} key = {key} ref={ref} style={{width: '100px', height: '100px', position:'relative'}}>
@@ -1345,6 +1485,17 @@ export const ThreeDImageVisualization = ({threeDImageData, filteredNews}) => {
                             <Card.Text style={{fontFamily: "unset", fontSize: "0.75em"}}>
                                 {clickedImage[0]._source.snippet}
                             </Card.Text>
+                            <Button icon="pi pi-bookmark" className="p-button-rounded p-button-secondary p-button-text" onClick={() => {handleMultimodalClickRequest(clickedImage[0], index); setSearchTermHistory(searchTermHistory => [...searchTermHistory,clickedImage[0]._source.headline.main + " (text)"])}} >
+                                <ImNewspaper style={{width:'100%', height: "20px"}}
+
+                                />
+                            </Button>
+
+                            <Button icon="pi pi-bookmark" className="p-button-rounded p-button-secondary p-button-text" onClick={() => {handleImageMouseClickRequest(clickedImage[0], index); setSearchTermHistory(searchTermHistory => [...searchTermHistory,clickedImage[0]._source.headline.main + " (image)"])}}>
+                                <BsImage style={{width:'100%', height: "17px"}}
+                                />
+                            </Button>
+
                             <Card.Link style={{fontFamily: "arial", fontSize: "0.75em", float:"right"}} variant="primary" href={"pre"}>See more</Card.Link>
                         </Card.Body>
                     </Card>

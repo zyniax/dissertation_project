@@ -4,7 +4,7 @@ import './SearchBars.css'
 import React, {useEffect, useState} from "react";
 
 
-const SearchBars = ({image, setFilteredNews, setKeywords, setThreeDImageData, setLineChartFiltedredNews, setNodes, setnodeEdges, setWordsToNews, newsOfTheDay, setSelectedNewsId, pastResultSearchNews, setPastResultSearchNews, searchTermHistory, setSearchTermHistory, searchTerm, setSearchTerm, applicationState, setApplicationState, setInitialFilteredNews, pastNodes, setPastNodes, pastNodeEdges, setPastNodeEdges, pastWordToNewsMap, setPastWordToNewsMap}) => {
+const SearchBars = ({setFilteredNews, setKeywords, setThreeDImageData, setLineChartFiltedredNews, setNodes, setnodeEdges, setWordsToNews, newsOfTheDay, setSelectedNewsId, pastResultSearchNews, setPastResultSearchNews, searchTermHistory, setSearchTermHistory, searchTerm, setSearchTerm, applicationState, setApplicationState, setInitialFilteredNews, pastNodes, setPastNodes, pastNodeEdges, setPastNodeEdges, pastWordToNewsMap, setPastWordToNewsMap, pastApplicationState, setPastApplicationState}) => {
 
 
 
@@ -55,10 +55,12 @@ const handleMouseClickRequest = () => {
         pastNodes.push(response.data.nodes)
         pastNodeEdges.push(response.data.edges)
         pastWordToNewsMap.push(wordsToNewsMap)
+        pastApplicationState.push(applicationState)
 
         setPastNodes(pastNodes)
         setPastNodeEdges(pastNodeEdges)
         setPastWordToNewsMap(pastWordToNewsMap)
+        setPastApplicationState(pastApplicationState)
 
 
         console.log("este é o wordstonewsMap",wordsToNewsMap)
@@ -96,8 +98,12 @@ const handleMouseClickRequest = () => {
         pastWordToNewsMap.splice(idx, pastWordToNewsMap.length - idx)
         setPastWordToNewsMap(pastWordToNewsMap)
 
+        pastApplicationState.splice(idx, pastApplicationState.length - idx)
+        setPastApplicationState(pastApplicationState)
+
 
         if(searchesToRemove.length - 1 >= 0){
+            setApplicationState(pastApplicationState[pastApplicationState.length - 1])
             setNodes(pastNodes[pastNodes.length - 1])
             setnodeEdges(pastNodeEdges[pastNodeEdges.length - 1])
             setWordsToNews(pastWordToNewsMap[pastWordToNewsMap.length - 1])
@@ -112,6 +118,8 @@ const handleMouseClickRequest = () => {
             setFilteredNews(newsOfTheDay)
             setLineChartFiltedredNews(newsOfTheDay)
             setSelectedNewsId(newsOfTheDay[0]._id + "_" + newsOfTheDay[0]._source.parsed_section[newsOfTheDay[0]._source.image_positions[0]].order)
+            setApplicationState([])
+            setPastApplicationState([])
 
         }
 

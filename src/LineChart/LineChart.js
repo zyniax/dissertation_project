@@ -84,7 +84,7 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                         .call(d3.axisBottom(x));
 
 
-
+                let isTooltipClicked = false
                 pastBrushedData.data = data
                 pastBrushedData.domain0 = x.domain()[0]
                 pastBrushedData.domain1 = x.domain()[1]
@@ -165,9 +165,10 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                         })
                         .attr("cy", function (d) {
                             return y(d._score)
-                        })
+                        }).on('click', handleMouseClick)
                         .on('mouseover', handleMouseOver)
                         .on('mouseout', function () {
+
                             d3.select(this)
                                 .transition()
                                 .duration(300)
@@ -215,10 +216,14 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                                 .html("Headline: ");
 
 
-                            tooltip.style("opacity", 0)
-                            tooltip.style("left", "0px")
-                            tooltip.style("top", "0px")
-                            tooltip.html("o")
+                            if(!isTooltipClicked){
+
+                                tooltip.style("opacity", 0)
+                                tooltip.style("left", "0px")
+                                tooltip.style("top", "0px")
+                                tooltip.html("o")
+                            }
+
 
 
                             //setMouseOverNews("")
@@ -308,31 +313,8 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                     .html("Double click to go back ");
 
 
-                    //add the rectangle with time
-                    //svg.append("rect")
-                    //   .datum(data)// I add the class line to be able to modify this line later on.
-                    //  .attr("fill", "none")
-                    //  .attr("stroke", "steelblue")
-                    //  .attr("stroke-width", 1.5)
-                    //  .attr("d", d3.line()
-                    //      .x(function(d) { return x2(d.date) })
-                    //      .y(function(d) { return y2(d.value) })
-                    //       .curve(d3.curveMonotoneX)
-                    //   )
-                    //   .attr("class", "zoom")
-                    //   .attr("width", 370)
-                    //   .attr("height", 46)
-
-                let extent1;
-                let extent2;
-
                     function brushed(event) {
 
-
-
-                        // var s = event.selection || x2.range();
-                        // x.domain(s.map(x2.invert, x2));
-                        // xAxis.transition().duration(1000).call(d3.axisBottom(x))
 
                         line
                             .select('.line')
@@ -380,15 +362,7 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                             if (!idleTimeout) return idleTimeout = setTimeout(idled, 350); // This allows to wait a little bit
                             x.domain([4, 8])
                         } else {
-                            console.log(x.domain()[0])
-                            //var a = d3.timeDay.count(dataset1[0].publication_date, dataset1[2].publication_date);
-                            //console.log(dataset1[0].publication_date < dataset1[2].publication_date)
-                            //var shownNews = 0;
-                            //for(var i = 0; i < dataset1.length; i++){
-                            //    if(x.invert(extent[0]) < dataset1[i].publication_date)
-                            ///        shownNews++;
-                            //    console.log(shownNews)
-                            // }
+
                             var date1 = "" + x.invert(extent[0]) + ""
                             var date2 = "" + x.invert(extent[1]) + ""
 
@@ -499,14 +473,8 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                             domain1 = pastBrush.domain1
                         }
 
-
-
-
                         x.domain([domain0, domain1])
 
-                         // x.domain(d3.extent(data, function (d) {
-                         //     return d3.timeParse("%Y-%m-%d")(d._source.pub_date.substring(0, 10));
-                         // }))
 
                         xAxis.transition().call(d3.axisBottom(x))
                         line
@@ -553,6 +521,30 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
              const tooltip2 = d3.select('body').append("div")
 
+                function handleMouseClick(event, d){
+
+                    isTooltipClicked = !isTooltipClicked
+
+                    const informationWidth = (width * 0.01)
+                    const informationHeight = (height * 0.02)
+
+                    //buscar o lugar da imagem nos dados
+                    let imageIndex = 0
+                    if(d._source.image_positions.length > 0)
+                        imageIndex = d._source.image_positions[0]
+
+                    tooltip.style("opacity", 1)
+                    tooltip.html( `<div class="card border-success"
+                    style="width: 220px; z-index: 10; position: absolute;"><div class="carousel slide"
+                    style="border-radius: 50%;"><div class="carousel-indicators"><button type="button" data-bs-target="" aria-label="Slide 1" class="active" aria-current="true"></button></div><div class="carousel-inner"><div class="active carousel-item" style="width: 100%;"><img class="d-block w-100" src="https://large.novasearch.org/nytimes/images/${d._source.parsed_section[imageIndex].hash }.jpg"  alt="First slide" style="width: 100%; height: 100px; object-fit: cover; overflow: hidden;"></div></div><a class="carousel-control-prev" role="button" href="#"><span class="visually-hidden">Previous</span></a><a class="carousel-control-next" role="button" href="#"><span class="visually-hidden">none</span></a></div><div class="card-body"><div class="card-title h5" style="font-size: .95em;"> ${d._source.headline.main} </div><div class="mb-2 text-muted card-subtitle h6" style="font-size: 0.75em;">${d._source.pub_date.substring(0, 10)}</div><p class="card-text" style="font-family: unset; font-size: 0.70em;">${d._source.snippet}</p>
+                 <button class="p-button p-component p-button-rounded p-button-secondary p-button-text p-button-icon-only"><span class="p-button-icon p-c pi pi-bookmark"></span><svg stroke="currentColor" fill="currentColor" stroke-width="0" version="1.1" viewBox="0 0 16 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 20px;"><path d="M14 4v-2h-14v11c0 0.552 0.448 1 1 1h13.5c0.828 0 1.5-0.672 1.5-1.5v-8.5h-2zM13 13h-12v-10h12v10zM2 5h10v1h-10zM8 7h4v1h-4zM8 9h4v1h-4zM8 11h3v1h-3zM2 7h5v5h-5z"></path></svg></button>
+                <button class="p-button p-component p-button-rounded p-button-secondary p-button-text p-button-icon-only"><span class="p-button-icon p-c pi pi-bookmark"></span><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 17px;"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"></path><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"></path></svg></button>
+                 <a class="card-link" variant="primary" href="${d._source.web_url}" style="font-family: arial; font-size: 0.75em; float: right; margin-top: 3%;">See more</a></div></div>`)
+                        .style('left', (event.pageX * 1.02) + 'px')
+                        .style('top', (event.pageY * 1.02 + 'px'))
+
+                                    }
+
 
             function handleMouseOver(event, d, i) {  // Add interactivity
 
@@ -592,6 +584,8 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
 
 
+                isTooltipClicked = false
+
                 //buscar o lugar da imagem nos dados
                 let imageIndex = 0
                 if(d._source.image_positions.length > 0)
@@ -600,7 +594,10 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                 tooltip.style("opacity", 1)
                 tooltip.html( `<div class="card border-success"
                     style="width: 220px; z-index: 10; position: absolute;"><div class="carousel slide"
-                    style="border-radius: 50%;"><div class="carousel-indicators"><button type="button" data-bs-target="" aria-label="Slide 1" class="active" aria-current="true"></button></div><div class="carousel-inner"><div class="active carousel-item" style="width: 100%;"><img class="d-block w-100" src="https://large.novasearch.org/nytimes/images/${d._source.parsed_section[imageIndex].hash }.jpg"  alt="First slide" style="width: 100%; height: 100px; object-fit: cover; overflow: hidden;"></div></div><a class="carousel-control-prev" role="button" href="#"><span class="visually-hidden">Previous</span></a><a class="carousel-control-next" role="button" href="#"><span class="visually-hidden">none</span></a></div><div class="card-body"><div class="card-title h5" style="font-size: .95em;"> ${d._source.headline.main} </div><div class="mb-2 text-muted card-subtitle h6" style="font-size: 0.75em;">${d._source.pub_date.substring(0, 10)}</div><p class="card-text" style="font-family: unset; font-size: 0.70em;">${d._source.snippet}</p><a class="card-link" variant="primary" href="pre" style="font-family: arial; font-size: 0.75em; float: right;">See more</a></div></div>`)
+                    style="border-radius: 50%;"><div class="carousel-indicators"><button type="button" data-bs-target="" aria-label="Slide 1" class="active" aria-current="true"></button></div><div class="carousel-inner"><div class="active carousel-item" style="width: 100%;"><img class="d-block w-100" src="https://large.novasearch.org/nytimes/images/${d._source.parsed_section[imageIndex].hash }.jpg"  alt="First slide" style="width: 100%; height: 100px; object-fit: cover; overflow: hidden;"></div></div><a class="carousel-control-prev" role="button" href="#"><span class="visually-hidden">Previous</span></a><a class="carousel-control-next" role="button" href="#"><span class="visually-hidden">none</span></a></div><div class="card-body"><div class="card-title h5" style="font-size: .95em;"> ${d._source.headline.main} </div><div class="mb-2 text-muted card-subtitle h6" style="font-size: 0.75em;">${d._source.pub_date.substring(0, 10)}</div><p class="card-text" style="font-family: unset; font-size: 0.70em;">${d._source.snippet}</p>
+                 <button class="p-button p-component p-button-rounded p-button-secondary p-button-text p-button-icon-only"><span class="p-button-icon p-c pi pi-bookmark"></span><svg stroke="currentColor" fill="currentColor" stroke-width="0" version="1.1" viewBox="0 0 16 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 20px;"><path d="M14 4v-2h-14v11c0 0.552 0.448 1 1 1h13.5c0.828 0 1.5-0.672 1.5-1.5v-8.5h-2zM13 13h-12v-10h12v10zM2 5h10v1h-10zM8 7h4v1h-4zM8 9h4v1h-4zM8 11h3v1h-3zM2 7h5v5h-5z"></path></svg></button>
+                 <button class="p-button p-component p-button-rounded p-button-secondary p-button-text p-button-icon-only"><span class="p-button-icon p-c pi pi-bookmark"></span><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 17px;"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"></path><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"></path></svg></button>
+                 <a class="card-link" variant="primary" href="${d._source.web_url}" style="font-family: arial; font-size: 0.75em; float: right; margin-top: 3%;">See more</a></div></div>`)
                     .style('left', (event.pageX * 1.02) + 'px')
                     .style('top', (event.pageY * 1.02 + 'px'))
 

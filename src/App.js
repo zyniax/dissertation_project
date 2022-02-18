@@ -14,8 +14,8 @@ import ThreeDImageVisualization from "./EmbeddingsVisualization/3DVisualizationC
 import HorizontalBarChart from "./LineChart/HorizontalBarChart/HorizontalBarChart";
 import Test from "./GraphVisualizations/KeywordsGraphVisualization/test"
 import WordGraphVisualization from "./GraphVisualizations/WordGraphVisualization/WordGraphVisualization"
-import colapsibleGraphVisualization from "./ColapsibleGraphVisualization/ColapsibleGraphVisualization";
-import ColapsibleGraphVisualization from "./ColapsibleGraphVisualization/ColapsibleGraphVisualization";
+import {TrackballControls} from "three/examples/jsm/controls/TrackballControls";
+
 
 
 function App() {
@@ -39,9 +39,19 @@ function App() {
     const [searchTerm, setSearchTerm] = useState([])
     const [applicationState, setApplicationState] = useState([])
     const [initialFilteredNews, setInitialFilteredNews] = useState([])
+    const [pastApplicationState, setPastApplicationState] = useState([])
+    const [key, setKey] = useState('home');
 
 
 
+    function fixTrackBalls(controls, hasBeenFixed, camera, renderer, defineTrackballControlsSettings){
+        if(!hasBeenFixed){
+            console.log("ABCD")
+            controls = new TrackballControls(camera, renderer.domElement);
+            defineTrackballControlsSettings()
+        }
+        hasBeenFixed = true
+    }
 
 
 
@@ -92,7 +102,8 @@ function App() {
                           setPastResultSearchNews={setPastResultSearchNews} searchTermHistory={searchTermHistory} setSearchTermHistory={setSearchTermHistory}
                           searchTerm={searchTerm} setSearchTerm={setSearchTerm} applicationState={applicationState} setApplicationState={setApplicationState}
                           setInitialFilteredNews={setInitialFilteredNews} pastNodes={pastNodes} setPastNodes={setPastNodes} pastNodeEdges={pastNodeEdges}
-                          setPastNodeEdges={setPastNodeEdges} pastWordToNewsMap={pastWordToNewsMap} setPastWordToNewsMap={setPastWordToNewsMap}  />
+                          setPastNodeEdges={setPastNodeEdges} pastWordToNewsMap={pastWordToNewsMap} setPastWordToNewsMap={setPastWordToNewsMap}
+                          pastApplicationState={pastApplicationState} setPastApplicationState={setPastApplicationState}/>
           </div>
 
 
@@ -106,13 +117,22 @@ function App() {
 
                   <Col>
 
-                      <Tabs style={{position: "absolute", marginTop: "-4%"}} defaultActiveKey="profile" id="uncontrolled-tab-example" className="mb-1">
-                          <Tab eventKey="Embeddings" title="Embeddings">
-                              <ThreeDImageVisualization threeDImageData={threeDImageData} filteredNews={filteredNews}/>
+                      <Tabs       activeKey={key} onSelect={(k) => setKey(k)} style={{position: "absolute", marginTop: "-4%"}} defaultActiveKey="profile" id="uncontrolled-tab-example" className="mb-1">
+                          <Tab   eventKey="Embeddings" title="Embeddings">
+
+                              {key=='Embeddings' && <ThreeDImageVisualization threeDImageData={threeDImageData} filteredNews={filteredNews} filteredNews={lineChartFiltedredNews} setImageSrc={setImageSrc} setFilteredNews={setFilteredNews} setKeywords={setKeywords} setThreeDImageData={setThreeDImageData}
+                                                                  setLineChartFiltedredNews={setLineChartFiltedredNews} selectedNewsId={selectedNewsId} setSelectedNewsId={setSelectedNewsId}
+                                                                  selectedNews={selectedNews} setSelectedNews={setSelectedNews} pastResultSearchNews={pastResultSearchNews}
+                                                                  setPastResultSearchNews={setPastResultSearchNews} searchTermHistory={searchTermHistory} setSearchTermHistory={setSearchTermHistory}
+                                                                  setNodes={setNodes} setnodeEdges={setnodeEdges} setInitialFilteredNews={setInitialFilteredNews} setWordsToNews={setWordsToNews}
+                                                                  pastNodes={pastNodes} setPastNodes={setPastNodes} pastNodeEdges={pastNodeEdges} setPastNodeEdges={setPastNodeEdges} pastWordToNewsMap={pastWordToNewsMap}
+                                                                  setPastWordToNewsMap={setPastWordToNewsMap} pastApplicationState={pastApplicationState} setPastApplicationState={setPastApplicationState}
+                                                                  applicationState={applicationState} setApplicationState={setApplicationState}/>}
+
 
                           </Tab>
 
-                          <Tab eventKey="Similar News" title="Similar News">
+                          <Tab  eventKey="Similar News" title="Similar News">
                               <Card style={{backgroundColor: "#fff",  borderRadius: "0.625rem", boxShadow: "0 2px 0 rgba(90, 97, 105, 0.11), 0 4px 8px rgba(90, 97, 105, 0.12), 0 10px 10px rgba(90, 97, 105, 0.06), 0 7px 70px rgba(90, 97, 105, 0.1)" }}>
 
 
@@ -124,7 +144,7 @@ function App() {
                               </Card>
                           </Tab>
 
-                          <Tab eventKey="Word Graph" title="Word Graph">
+                          <Tab  eventKey="Word Graph" title="Word Graph">
                               <Card style={{backgroundColor: "#fff",  borderRadius: "0.625rem", boxShadow: "0 2px 0 rgba(90, 97, 105, 0.11), 0 4px 8px rgba(90, 97, 105, 0.12), 0 10px 10px rgba(90, 97, 105, 0.06), 0 7px 70px rgba(90, 97, 105, 0.1)" }}>
 
 
@@ -145,7 +165,7 @@ function App() {
 
                               </div>
                           </Card>
-                          <Tab eventKey="Time Analysis" title="Time Analysis">
+                          <Tab  eventKey="Time Analysis" title="Time Analysis">
 
                               <Card style={{backgroundColor: "#fff",  borderRadius: "0.625rem", boxShadow: "0 2px 0 rgba(90, 97, 105, 0.11), 0 4px 8px rgba(90, 97, 105, 0.12), 0 10px 10px rgba(90, 97, 105, 0.06), 0 7px 70px rgba(90, 97, 105, 0.1)" }}>
 
@@ -175,7 +195,8 @@ function App() {
                                 setPastResultSearchNews={setPastResultSearchNews} searchTermHistory={searchTermHistory} setSearchTermHistory={setSearchTermHistory}
                                 setNodes={setNodes} setnodeEdges={setnodeEdges} setInitialFilteredNews={setInitialFilteredNews} setWordsToNews={setWordsToNews}
                                 pastNodes={pastNodes} setPastNodes={setPastNodes} pastNodeEdges={pastNodeEdges} setPastNodeEdges={setPastNodeEdges} pastWordToNewsMap={pastWordToNewsMap}
-                                setPastWordToNewsMap={setPastWordToNewsMap}/>
+                                setPastWordToNewsMap={setPastWordToNewsMap} pastApplicationState={pastApplicationState} setPastApplicationState={setPastApplicationState}
+                                applicationState={applicationState} setApplicationState={setApplicationState}/>
 
                      <Manual_cropper image={image}/>
                 </div>

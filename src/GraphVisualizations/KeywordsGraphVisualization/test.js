@@ -5,6 +5,8 @@ import {Card, Carousel, Col} from "react-bootstrap";
 import axios from "axios";
 import {BsImage} from "react-icons/bs";
 import {ImNewspaper} from "react-icons/im";
+import {GrTextAlignFull} from "react-icons/gr"
+import {Button} from "primereact/button";
 
 export const Test = ({selectedNewsId, setSelectedNewsId, setSelectedNews, setFilteredNews, setKeywords, setThreeDImageData, setLineChartFiltedredNews, selectedNews, pastResultSearchNews, setPastResultSearchNews, setSearchTermHistory}) => {
 
@@ -62,6 +64,7 @@ export const Test = ({selectedNewsId, setSelectedNewsId, setSelectedNews, setFil
 
             setKeywords(response.data.keywords)
             setThreeDImageData(response.data)
+            console.log("datad", response.data)
             setFilteredNews(response.data.searchWordResult.body.hits.hits)
             setLineChartFiltedredNews(response.data.searchWordResult.body.hits.hits)
             setSelectedNewsId(response.data.searchWordResult.body.hits.hits[0]._id + "_" + response.data.searchWordResult.body.hits.hits[0]._source.parsed_section[response.data.searchWordResult.body.hits.hits[0]._source.image_positions[0]].order)
@@ -621,8 +624,8 @@ export const Test = ({selectedNewsId, setSelectedNewsId, setSelectedNews, setFil
 
 
                     return d == root ? "#248f24" :
-                        d._children ? "#1888ff" // collapsed package
-                            : d.children ? "#1888ff" // expanded package
+                        d._children ? "#1f77b4" // collapsed package
+                            : d.children ? "#1f77b4" // expanded package
                             : "red" // leaf node ,  d3.select(this).select(".haloCircle").remove();
                 }
 
@@ -754,19 +757,21 @@ export const Test = ({selectedNewsId, setSelectedNewsId, setSelectedNews, setFil
                         <Card.Text style={{fontFamily: "unset", fontSize: "0.75em"}}>
                             {mouseOverNews._source.snippet}
                         </Card.Text>
-                        <Card.Link style={{fontFamily: "arial", fontSize: "0.75em", float:"right"}} variant="primary" href={"pre"}>See more</Card.Link>
 
-                        <BsImage onClick={() => {handleVisualMouseClickRequest(mouseOverNews, index); setSearchTermHistory(searchTermHistory => [...searchTermHistory, mouseOverNews._source.headline.main + " (image)"])}}
-                                 style={{width:'15%', height:'27px', objectFit: "cover", overflow: "hidden", float:"left"}}
-                        />
-                        <ImNewspaper onClick={() => {handleMultiModalMouseClickRequest(mouseOverNews, index); setSearchTermHistory(searchTermHistory => [...searchTermHistory, mouseOverNews._source.headline.main + " (text)"])}}
-                                     style={{width:'15%', height:'29px', objectFit: "cover", overflow: "hidden", float:"left"}}
 
-                        />
-                        <ImNewspaper onClick={() => {handleMultiModalMouseClickRequest(mouseOverNews, index); setSearchTermHistory(searchTermHistory => [...searchTermHistory, mouseOverNews._source.headline.main + " (text)"])}}
-                                     style={{width:'15%', height:'29px', objectFit: "cover", overflow: "hidden", float:"left"}}
+                        <Button icon="pi pi-bookmark" className="p-button-rounded p-button-secondary p-button-text" onClick={() => {handleMultiModalMouseClickRequest(mouseOverNews, index); setSearchTermHistory(searchTermHistory => [...searchTermHistory,mouseOverNews._source.headline.main + " (text)"])}} >
+                            <ImNewspaper style={{width:'100%', height: "20px"}}
 
-                        />
+                            />
+                        </Button>
+
+                        <Button icon="pi pi-bookmark" className="p-button-rounded p-button-secondary p-button-text" onClick={() => {handleVisualMouseClickRequest(mouseOverNews, index); setSearchTermHistory(searchTermHistory => [...searchTermHistory,mouseOverNews._source.headline.main + " (image)"])}}>
+                            <BsImage style={{width:'100%', height: "17px"}}
+                            />
+                        </Button>
+
+                        <Card.Link style={{fontFamily: "arial", fontSize: "0.75em", float:"right"}} variant="primary" href={mouseOverNews._source.web_url}>See more</Card.Link>
+
                     </Card.Body>
                 </Card> }
             </div>
