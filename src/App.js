@@ -32,6 +32,7 @@ function App() {
     const [pastNodeEdges, setPastNodeEdges] = useState([]);
     const [wordsToNews, setWordsToNews] = useState([]);
     const [pastWordToNewsMap, setPastWordToNewsMap] = useState([])
+    const [pastThreeDImageData, setPastThreeDImageData] = useState([])
     const [selectedNews, setSelectedNews] = useState([])
     const [selectedNewsId, setSelectedNewsId] = useState("");
     const [searchTermHistory, setSearchTermHistory] = useState([])
@@ -41,17 +42,6 @@ function App() {
     const [initialFilteredNews, setInitialFilteredNews] = useState([])
     const [pastApplicationState, setPastApplicationState] = useState([])
     const [key, setKey] = useState('home');
-
-
-
-    function fixTrackBalls(controls, hasBeenFixed, camera, renderer, defineTrackballControlsSettings){
-        if(!hasBeenFixed){
-            console.log("ABCD")
-            controls = new TrackballControls(camera, renderer.domElement);
-            defineTrackballControlsSettings()
-        }
-        hasBeenFixed = true
-    }
 
 
 
@@ -103,7 +93,7 @@ function App() {
                           searchTerm={searchTerm} setSearchTerm={setSearchTerm} applicationState={applicationState} setApplicationState={setApplicationState}
                           setInitialFilteredNews={setInitialFilteredNews} pastNodes={pastNodes} setPastNodes={setPastNodes} pastNodeEdges={pastNodeEdges}
                           setPastNodeEdges={setPastNodeEdges} pastWordToNewsMap={pastWordToNewsMap} setPastWordToNewsMap={setPastWordToNewsMap}
-                          pastApplicationState={pastApplicationState} setPastApplicationState={setPastApplicationState}/>
+                          pastApplicationState={pastApplicationState} setPastApplicationState={setPastApplicationState} pastThreeDImageData={pastThreeDImageData} setPastThreeDImageData={setPastThreeDImageData}/>
           </div>
 
 
@@ -117,7 +107,7 @@ function App() {
 
                   <Col>
 
-                      <Tabs       activeKey={key} onSelect={(k) => setKey(k)} style={{position: "absolute", marginTop: "-4%"}} defaultActiveKey="profile" id="uncontrolled-tab-example" className="mb-1">
+                      <Tabs activeKey={key} onSelect={(k) => setKey(k)} style={{position: "absolute", marginTop: "-4%"}} defaultActiveKey="profile" id="uncontrolled-tab-example" className="mb-1">
                           <Tab   eventKey="Embeddings" title="Embeddings">
 
                               {key=='Embeddings' && <ThreeDImageVisualization threeDImageData={threeDImageData} filteredNews={filteredNews} filteredNews={lineChartFiltedredNews} setImageSrc={setImageSrc} setFilteredNews={setFilteredNews} setKeywords={setKeywords} setThreeDImageData={setThreeDImageData}

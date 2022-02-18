@@ -473,7 +473,7 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
 
                                 console.log(threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2])
                                 console.log(threeDImageData.embeddings[indexesOfImagesInsideSphere])
-                                if(camera.position.z - (threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier) < 50 && createdPlanes[i] != undefined && createdPlanes[i][j] != undefined && createdPlanes[i][j].showingHighQualityImage == false ){
+                                if(camera.position.z - (threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier) < 70 && createdPlanes[i] != undefined && createdPlanes[i][j] != undefined && createdPlanes[i][j].showingHighQualityImage == false ){
 
 
 
@@ -510,7 +510,7 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
 
                                     console.log("pre3")
                                 }
-                                 if(camera.position.z - (threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier) < 120 && createdPlanes[i] != undefined && createdPlanes[i][j] != undefined && createdPlanes[i][j].showingMediumQualityImage == false  && createdPlanes[i][j].showingHighQualityImage == false){
+                                 if(camera.position.z - (threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier) < 150 && createdPlanes[i] != undefined && createdPlanes[i][j] != undefined && createdPlanes[i][j].showingMediumQualityImage == false  && createdPlanes[i][j].showingHighQualityImage == false){
 
 
                                     console.log("kkkkkkkkkkkkkkkkkkkkkkk entrei no medium")
@@ -1235,7 +1235,7 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
 
 
                 if(clickedObject.geometry.type === 'PlaneGeometry')
-                    controls.target.set(objectPosition.x, objectPosition.y, objectPosition.z + 10)
+                    controls.target.set(objectPosition.x, objectPosition.y, objectPosition.z + 30)
                 else if(clickedObject.geometry.type === 'SphereGeometry'){
                     const sphereRadius = clickedObject.geometry.boundingSphere.radius
                     controls.target.set(objectPosition.x, objectPosition.y, objectPosition.z + sphereRadius + 100)

@@ -4,7 +4,7 @@ import './SearchBars.css'
 import React, {useEffect, useState} from "react";
 
 
-const SearchBars = ({setFilteredNews, setKeywords, setThreeDImageData, setLineChartFiltedredNews, setNodes, setnodeEdges, setWordsToNews, newsOfTheDay, setSelectedNewsId, pastResultSearchNews, setPastResultSearchNews, searchTermHistory, setSearchTermHistory, searchTerm, setSearchTerm, applicationState, setApplicationState, setInitialFilteredNews, pastNodes, setPastNodes, pastNodeEdges, setPastNodeEdges, pastWordToNewsMap, setPastWordToNewsMap, pastApplicationState, setPastApplicationState}) => {
+const SearchBars = ({setFilteredNews, setKeywords, setThreeDImageData, setLineChartFiltedredNews, setNodes, setnodeEdges, setWordsToNews, newsOfTheDay, setSelectedNewsId, pastResultSearchNews, setPastResultSearchNews, searchTermHistory, setSearchTermHistory, searchTerm, setSearchTerm, applicationState, setApplicationState, setInitialFilteredNews, pastNodes, setPastNodes, pastNodeEdges, setPastNodeEdges, pastWordToNewsMap, setPastWordToNewsMap, pastApplicationState, setPastApplicationState, pastThreeDImageData, setPastThreeDImageData}) => {
 
 
 
@@ -56,11 +56,14 @@ const handleMouseClickRequest = () => {
         pastNodeEdges.push(response.data.edges)
         pastWordToNewsMap.push(wordsToNewsMap)
         pastApplicationState.push(applicationState)
+        pastThreeDImageData.push(response.data)
+
 
         setPastNodes(pastNodes)
         setPastNodeEdges(pastNodeEdges)
         setPastWordToNewsMap(pastWordToNewsMap)
         setPastApplicationState(pastApplicationState)
+        setPastThreeDImageData(pastThreeDImageData)
 
 
         console.log("este é o wordstonewsMap",wordsToNewsMap)
@@ -101,6 +104,9 @@ const handleMouseClickRequest = () => {
         pastApplicationState.splice(idx, pastApplicationState.length - idx)
         setPastApplicationState(pastApplicationState)
 
+        pastThreeDImageData.splice(idx, pastThreeDImageData.length - idx)
+        setPastThreeDImageData(pastThreeDImageData)
+
 
         if(searchesToRemove.length - 1 >= 0){
             setApplicationState(pastApplicationState[pastApplicationState.length - 1])
@@ -111,7 +117,7 @@ const handleMouseClickRequest = () => {
             setFilteredNews(searchesToRemove[searchesToRemove.length - 1])
             setLineChartFiltedredNews(searchesToRemove[searchesToRemove.length-1])
             setSelectedNewsId(searchesToRemove[searchesToRemove.length - 1][0]._id + "_" + searchesToRemove[searchesToRemove.length - 1][0]._source.parsed_section[searchesToRemove[searchesToRemove.length - 1][0]._source.image_positions[0]].order)
-
+            setThreeDImageData(pastThreeDImageData[pastThreeDImageData.length-1])
         }
         else {
             setInitialFilteredNews(newsOfTheDay)
@@ -120,6 +126,7 @@ const handleMouseClickRequest = () => {
             setSelectedNewsId(newsOfTheDay[0]._id + "_" + newsOfTheDay[0]._source.parsed_section[newsOfTheDay[0]._source.image_positions[0]].order)
             setApplicationState([])
             setPastApplicationState([])
+            setThreeDImageData([])
 
         }
 
