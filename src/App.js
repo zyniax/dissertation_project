@@ -8,13 +8,15 @@ import ThreeDWorldVisualization from "./3DWorldVisualization/ThreeDWorldVisualiz
 import React, {useEffect, useState} from "react";
 import NavBar from './Navbar Components/Navbar'
 import {BrowserRouter as Router} from 'react-router-dom'
-import RelevantHeadlines from "./LineChart/RelevantHeadlines/RelevantHeadlines";
-import {Card, Col, Row, ListGroup, Tabs, Tab} from "react-bootstrap";
+import {Card, Col, Row, ListGroup, Tabs, Tab, ButtonGroup, ToggleButton} from "react-bootstrap";
 import ThreeDImageVisualization from "./EmbeddingsVisualization/3DVisualizationClasses/3DImagesVisualization";
 import HorizontalBarChart from "./LineChart/HorizontalBarChart/HorizontalBarChart";
 import Test from "./GraphVisualizations/KeywordsGraphVisualization/test"
 import WordGraphVisualization from "./GraphVisualizations/WordGraphVisualization/WordGraphVisualization"
-import {TrackballControls} from "three/examples/jsm/controls/TrackballControls";
+import paraTrabalho from "./Navbar Components/paraTrabalho";
+import ParaTrabalho from "./Navbar Components/paraTrabalho";
+import {NotificationContainer} from "react-notifications";
+
 
 
 
@@ -41,7 +43,13 @@ function App() {
     const [applicationState, setApplicationState] = useState([])
     const [initialFilteredNews, setInitialFilteredNews] = useState([])
     const [pastApplicationState, setPastApplicationState] = useState([])
+    const [loading, setLoading] = useState(false)
+    const [clusterKeywords, setClusterKeywords] = useState([])
     const [key, setKey] = useState('home');
+
+
+
+
 
 
 
@@ -74,11 +82,16 @@ function App() {
 
     }, []);
 
+
+
   return (
 
 
 
       <>
+
+          <NotificationContainer/>
+
           <Router>
               <NavBar/>
           </Router>
@@ -93,9 +106,9 @@ function App() {
                           searchTerm={searchTerm} setSearchTerm={setSearchTerm} applicationState={applicationState} setApplicationState={setApplicationState}
                           setInitialFilteredNews={setInitialFilteredNews} pastNodes={pastNodes} setPastNodes={setPastNodes} pastNodeEdges={pastNodeEdges}
                           setPastNodeEdges={setPastNodeEdges} pastWordToNewsMap={pastWordToNewsMap} setPastWordToNewsMap={setPastWordToNewsMap}
-                          pastApplicationState={pastApplicationState} setPastApplicationState={setPastApplicationState} pastThreeDImageData={pastThreeDImageData} setPastThreeDImageData={setPastThreeDImageData}/>
+                          pastApplicationState={pastApplicationState} setPastApplicationState={setPastApplicationState} pastThreeDImageData={pastThreeDImageData} setPastThreeDImageData={setPastThreeDImageData}
+                          setLoading={setLoading} loading={loading}  setClusterKeywords={setClusterKeywords} setSelectedNews={setSelectedNews}/>
           </div>
-
 
 
           <div style={{width: "97%", overflow: "hidden " , marginTop: "5.5%", height: "100%", marginLeft: "2.5%"}}>
@@ -107,20 +120,7 @@ function App() {
 
                   <Col>
 
-                      <Tabs activeKey={key} onSelect={(k) => setKey(k)} style={{position: "absolute", marginTop: "-4%"}} defaultActiveKey="profile" id="uncontrolled-tab-example" className="mb-1">
-                          <Tab   eventKey="Embeddings" title="Embeddings">
-
-                              {key=='Embeddings' && <ThreeDImageVisualization threeDImageData={threeDImageData} filteredNews={filteredNews} filteredNews={lineChartFiltedredNews} setImageSrc={setImageSrc} setFilteredNews={setFilteredNews} setKeywords={setKeywords} setThreeDImageData={setThreeDImageData}
-                                                                  setLineChartFiltedredNews={setLineChartFiltedredNews} selectedNewsId={selectedNewsId} setSelectedNewsId={setSelectedNewsId}
-                                                                  selectedNews={selectedNews} setSelectedNews={setSelectedNews} pastResultSearchNews={pastResultSearchNews}
-                                                                  setPastResultSearchNews={setPastResultSearchNews} searchTermHistory={searchTermHistory} setSearchTermHistory={setSearchTermHistory}
-                                                                  setNodes={setNodes} setnodeEdges={setnodeEdges} setInitialFilteredNews={setInitialFilteredNews} setWordsToNews={setWordsToNews}
-                                                                  pastNodes={pastNodes} setPastNodes={setPastNodes} pastNodeEdges={pastNodeEdges} setPastNodeEdges={setPastNodeEdges} pastWordToNewsMap={pastWordToNewsMap}
-                                                                  setPastWordToNewsMap={setPastWordToNewsMap} pastApplicationState={pastApplicationState} setPastApplicationState={setPastApplicationState}
-                                                                  applicationState={applicationState} setApplicationState={setApplicationState}/>}
-
-
-                          </Tab>
+                      <Tabs defaultActiveKey="Time Analysis" onSelect={(k) => setKey(k)} style={{position: "absolute", marginTop: "-4%"}} id="uncontrolled-tab-example" className="mb-1">
 
                           <Tab  eventKey="Similar News" title="Similar News">
                               <Card style={{backgroundColor: "#fff",  borderRadius: "0.625rem", boxShadow: "0 2px 0 rgba(90, 97, 105, 0.11), 0 4px 8px rgba(90, 97, 105, 0.12), 0 10px 10px rgba(90, 97, 105, 0.06), 0 7px 70px rgba(90, 97, 105, 0.1)" }}>
@@ -134,27 +134,20 @@ function App() {
                               </Card>
                           </Tab>
 
-                          <Tab  eventKey="Word Graph" title="Word Graph">
-                              <Card style={{backgroundColor: "#fff",  borderRadius: "0.625rem", boxShadow: "0 2px 0 rgba(90, 97, 105, 0.11), 0 4px 8px rgba(90, 97, 105, 0.12), 0 10px 10px rgba(90, 97, 105, 0.06), 0 7px 70px rgba(90, 97, 105, 0.1)" }}>
+                          <Tab   eventKey="Embeddings" title="Embeddings">
+
+                              {key=='Embeddings' && <ThreeDImageVisualization threeDImageData={threeDImageData} filteredNews={filteredNews} filteredNews={lineChartFiltedredNews} setImageSrc={setImageSrc} setFilteredNews={setFilteredNews} setKeywords={setKeywords} setThreeDImageData={setThreeDImageData}
+                                                                  setLineChartFiltedredNews={setLineChartFiltedredNews} selectedNewsId={selectedNewsId} setSelectedNewsId={setSelectedNewsId}
+                                                                  selectedNews={selectedNews} setSelectedNews={setSelectedNews} pastResultSearchNews={pastResultSearchNews}
+                                                                  setPastResultSearchNews={setPastResultSearchNews} searchTermHistory={searchTermHistory} setSearchTermHistory={setSearchTermHistory}
+                                                                  setNodes={setNodes} setnodeEdges={setnodeEdges} setInitialFilteredNews={setInitialFilteredNews} setWordsToNews={setWordsToNews}
+                                                                  pastNodes={pastNodes} setPastNodes={setPastNodes} pastNodeEdges={pastNodeEdges} setPastNodeEdges={setPastNodeEdges} pastWordToNewsMap={pastWordToNewsMap}
+                                                                  setPastWordToNewsMap={setPastWordToNewsMap} pastApplicationState={pastApplicationState} setPastApplicationState={setPastApplicationState}
+                                                                  applicationState={applicationState} setApplicationState={setApplicationState} loading={loading} clusterKeywords={clusterKeywords}/>}
 
 
-                                  <div style={{float:"left", marginBottom: '10%'}}>
-
-                                      <WordGraphVisualization nodes={nodes} nodeEdges={nodeEdges} wordsToNews={wordsToNews} setFilteredNews={setFilteredNews} filteredNews={filteredNews} setLineChartFiltedredNews={setLineChartFiltedredNews} initialFilteredNews={initialFilteredNews}/>
-
-                                  </div>
-                              </Card>
                           </Tab>
 
-                          <Card style={{backgroundColor: "#fff",  borderRadius: "0.625rem", boxShadow: "0 2px 0 rgba(90, 97, 105, 0.11), 0 4px 8px rgba(90, 97, 105, 0.12), 0 10px 10px rgba(90, 97, 105, 0.06), 0 7px 70px rgba(90, 97, 105, 0.1)" }}>
-
-
-                              <div style={{float:"left", marginBottom: '10%'}}>
-
-                                  <Test/>
-
-                              </div>
-                          </Card>
                           <Tab  eventKey="Time Analysis" title="Time Analysis">
 
                               <Card style={{backgroundColor: "#fff",  borderRadius: "0.625rem", boxShadow: "0 2px 0 rgba(90, 97, 105, 0.11), 0 4px 8px rgba(90, 97, 105, 0.12), 0 10px 10px rgba(90, 97, 105, 0.06), 0 7px 70px rgba(90, 97, 105, 0.1)" }}>
@@ -162,10 +155,27 @@ function App() {
 
                                   <div style={{float:"left", marginBottom: '10%'}}>
 
-                                      <Line_chart setBrushExtent={setBrushExtent} style={{float:"left"}} setFilteredNews={setFilteredNews} filteredNews={filteredNews} brushExtent={brushExtent} lineChartFiltedredNews={lineChartFiltedredNews} setLineChartFiltedredNews={setLineChartFiltedredNews} />
-                                      <HorizontalBarChart keywords={keywords} filteredNews={filteredNews} setLineChartFiltedredNews={setLineChartFiltedredNews} setFilteredNews={setFilteredNews} lineChartFiltedredNews={lineChartFiltedredNews}/>
 
-                                  </div>
+                                      <Line_chart setBrushExtent={setBrushExtent} style={{float:"left"}} setFilteredNews={setFilteredNews} filteredNews={filteredNews} brushExtent={brushExtent} lineChartFiltedredNews={lineChartFiltedredNews} setLineChartFiltedredNews={setLineChartFiltedredNews} loading={loading}
+                                                  pastResultSearchNews={pastResultSearchNews} setPastResultSearchNews={setPastResultSearchNews} setKeywords={setKeywords} setThreeDImageData={setThreeDImageData} setFilteredNews={setFilteredNews} setSearchTermHistory={setSearchTermHistory}/>
+
+
+                                      <Tabs style={{borderBottom: '0px', borderColor: '#fff'}}>
+
+                                          <Tab style={{borderColor: '#fff'}} eventKey="WordGraph" title="WordGraph">
+
+                                              <WordGraphVisualization nodes={nodes} nodeEdges={nodeEdges} wordsToNews={wordsToNews} setFilteredNews={setFilteredNews} filteredNews={filteredNews} setLineChartFiltedredNews={setLineChartFiltedredNews} initialFilteredNews={initialFilteredNews} loading={loading}/>
+
+                                          </Tab>
+
+
+                                       <Tab style={{borderColor: '#fff'}} eventKey="BarChart" title="BarChart">
+                                           <HorizontalBarChart  keywords={keywords} filteredNews={filteredNews} setLineChartFiltedredNews={setLineChartFiltedredNews} setFilteredNews={setFilteredNews} lineChartFiltedredNews={lineChartFiltedredNews} loading={loading}/>
+
+                                       </Tab>
+
+                                      </Tabs>
+                                          </div>
                               </Card>
                           </Tab>
 
@@ -186,7 +196,7 @@ function App() {
                                 setNodes={setNodes} setnodeEdges={setnodeEdges} setInitialFilteredNews={setInitialFilteredNews} setWordsToNews={setWordsToNews}
                                 pastNodes={pastNodes} setPastNodes={setPastNodes} pastNodeEdges={pastNodeEdges} setPastNodeEdges={setPastNodeEdges} pastWordToNewsMap={pastWordToNewsMap}
                                 setPastWordToNewsMap={setPastWordToNewsMap} pastApplicationState={pastApplicationState} setPastApplicationState={setPastApplicationState}
-                                applicationState={applicationState} setApplicationState={setApplicationState}/>
+                                applicationState={applicationState} setApplicationState={setApplicationState} setLoading={setLoading} />
 
                      <Manual_cropper image={image}/>
                 </div>
@@ -197,6 +207,7 @@ function App() {
 
               </Row>
         <ThreeDWorldVisualization  setFilteredNews={setFilteredNews}/>
+
           </div>
 
       </>

@@ -273,7 +273,7 @@ export const ThreeDWorldVisualization = ({setFilteredNews}) => {
 
     return(
 
-        <div id="container">
+        <div id="container" style={{width:"0px"}}>
             <div id="my-gui-container" style={{position:"absolute"}}/>
             <canvas id="c"/>
             <div id="labels"></div>

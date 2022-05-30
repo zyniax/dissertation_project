@@ -27,7 +27,7 @@ export const Test = ({selectedNewsId, setSelectedNewsId, setSelectedNews, setFil
         const news_id = news._id + "_" + news._source.parsed_section[news._source.image_positions[index]].order
 
         //https://dissertationserver.herokuapp.com/
-        axios.get('http://localhost:3000/api/request/search/' + news_id ,{
+        axios.get('http://localhost:3000/api/request/similarNews/byText/' + news_id ,{
             headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
@@ -40,7 +40,7 @@ export const Test = ({selectedNewsId, setSelectedNewsId, setSelectedNews, setFil
             setThreeDImageData(response.data)
             setFilteredNews(response.data.searchWordResult.body.hits.hits)
             setLineChartFiltedredNews(response.data.searchWordResult.body.hits.hits)
-            setSelectedNewsId(response.data.searchWordResult.body.hits.hits[0]._id + "_" + response.data.searchWordResult.body.hits.hits[0]._source.parsed_section[response.data.searchWordResult.body.hits.hits[0]._source.image_positions[0]].order)
+            //setSelectedNewsId(response.data.searchWordResult.body.hits.hits[0]._id + "_" + response.data.searchWordResult.body.hits.hits[0]._source.parsed_section[response.data.searchWordResult.body.hits.hits[0]._source.image_positions[0]].order)
             pastResultSearchNews.push(response.data.searchWordResult.body.hits.hits)
             setPastResultSearchNews(pastResultSearchNews)
 
@@ -53,7 +53,7 @@ export const Test = ({selectedNewsId, setSelectedNewsId, setSelectedNews, setFil
         const news_id = news._id + "_" + news._source.parsed_section[news._source.image_positions[index]].order
 
         //https://dissertationserver.herokuapp.com
-        axios.get('http://localhost:3000/api/request/ByImage/' + news_id ,{
+        axios.get('http://localhost:3000/api/request/similarNews/byImage/' + news_id ,{
             headers: {
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
@@ -67,7 +67,7 @@ export const Test = ({selectedNewsId, setSelectedNewsId, setSelectedNews, setFil
             console.log("datad", response.data)
             setFilteredNews(response.data.searchWordResult.body.hits.hits)
             setLineChartFiltedredNews(response.data.searchWordResult.body.hits.hits)
-            setSelectedNewsId(response.data.searchWordResult.body.hits.hits[0]._id + "_" + response.data.searchWordResult.body.hits.hits[0]._source.parsed_section[response.data.searchWordResult.body.hits.hits[0]._source.image_positions[0]].order)
+            //setSelectedNewsId(response.data.searchWordResult.body.hits.hits[0]._id + "_" + response.data.searchWordResult.body.hits.hits[0]._source.parsed_section[response.data.searchWordResult.body.hits.hits[0]._source.image_positions[0]].order)
             pastResultSearchNews.push(response.data.searchWordResult.body.hits.hits)
             setPastResultSearchNews(pastResultSearchNews)
 
@@ -75,9 +75,6 @@ export const Test = ({selectedNewsId, setSelectedNewsId, setSelectedNews, setFil
     }
 
     useEffect(() => {
-
-        console.log("selectedNewsNovo", selectedNewsId)
-
 
 
         if(selectedNewsId != undefined && selectedNewsId != "") {

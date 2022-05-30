@@ -1,9 +1,10 @@
 import React, {useEffect, useRef, useState} from "react";
 import * as d3 from "d3";
+import { ProgressSpinner } from 'primereact/progressspinner';
 import {Card, Carousel, Col} from "react-bootstrap";
 import axios from "axios";
 
-export const WordGraphVisualization = ({setBrushExtent, nodes, nodeEdges, wordsToNews, setFilteredNews, filteredNews, setLineChartFiltedredNews, initialFilteredNews}) => {
+export const WordGraphVisualization = ({nodes, nodeEdges, wordsToNews, setFilteredNews, filteredNews, setLineChartFiltedredNews, initialFilteredNews, loading}) => {
 
     const [mouseOverNews, setMouseOverNews] = useState("")
 
@@ -23,15 +24,9 @@ export const WordGraphVisualization = ({setBrushExtent, nodes, nodeEdges, wordsT
 
         if(nodes != "" && nodeEdges != "" && wordsToNews.size > 0) {
 
-
-
-
-            //so para obter o primeiro filteredNews de todos
-
-
-
             //console.log("este são os node edges", nodeEdges)
             console.log("estes são as wordstonews", wordsToNews)
+            console.log("nodeEdges, ", nodeEdges)
 
 
                 var isFocus = false
@@ -71,6 +66,7 @@ export const WordGraphVisualization = ({setBrushExtent, nodes, nodeEdges, wordsT
                 nodeEdges.forEach(function (d) {
                     adjlist[d.source.index + "-" + d.target.index] = true;
                     adjlist[d.target.index + "-" + d.source.index] = true;
+
                 });
 
                 function neigh(a, b) {
@@ -132,7 +128,12 @@ export const WordGraphVisualization = ({setBrushExtent, nodes, nodeEdges, wordsT
                         return color(8);
                     })
 
-                //node.on("click", focus).on("mouseout", unfocus);
+                node.on("mouseover", function(event,o){
+                    labelNode.attr("font-weight", function(o){
+                        if(o.node.id === d3.select(event.target).datum().id)
+                            return 900
+                    })
+                })
 
                 node.call(
                     d3.drag()
@@ -152,12 +153,13 @@ export const WordGraphVisualization = ({setBrushExtent, nodes, nodeEdges, wordsT
                     .style("fill", "#555")
                     .style("font-family", "Arial")
                     .style("font-size", 12)
-                    .style("pointer-events", "none"); // to prevent mouseover/drag capture
+                    .style("pointer-events", "none") // to prevent mouseover/drag capture
 
-                //node.on("mouseover", focus)
+
+
+
 
                 node.on("click", function (event, d) {
-
 
                     //index do node clickado
                     if(clickedNodesWords.length == 0){
@@ -179,6 +181,7 @@ export const WordGraphVisualization = ({setBrushExtent, nodes, nodeEdges, wordsT
                         }
 
                         d3.select(this).style("fill", "red").attr('stroke-width', 4)
+
 
                         console.log("newFilteredNews", newFilteredNews)
                         focus(event, d)
@@ -203,6 +206,7 @@ export const WordGraphVisualization = ({setBrushExtent, nodes, nodeEdges, wordsT
                             clickedNodesIndex.splice(indexToRemove,1)
 
                         d3.select(this).style("fill", "#1f76b4")
+
 
                         if(clickedNodesWords.length == 0){
                             unfocus()
@@ -253,6 +257,7 @@ export const WordGraphVisualization = ({setBrushExtent, nodes, nodeEdges, wordsT
                         var index = d3.select(event.target).datum().index;
 
                         d3.select(this).style("fill", "red")
+
 
                         clickedNodesWords.push(nodeWord)
                         clickedNodesIndex.push(index)
@@ -351,6 +356,7 @@ export const WordGraphVisualization = ({setBrushExtent, nodes, nodeEdges, wordsT
                     node.style("opacity", function (o) {
                         return neigh(index, o.index) ? 1 : 0.1;
                     });
+
                     labelNode.attr("display", function (o) {
                         return neigh(index, o.node.index) ? "block" : "none";
                     });
@@ -404,12 +410,11 @@ export const WordGraphVisualization = ({setBrushExtent, nodes, nodeEdges, wordsT
                     d.fy = null;
                 }
         }
-    }, [nodes, wordsToNews])
+    }, [nodes, wordsToNews, loading])
 
 
     return (
-        <div  ref={svgRef} style={{ position:'relative'}} >
-        </div>
+        loading ? <ProgressSpinner style={{paddingTop:"50%", width: '50px', height: '50px', display: "flex", justifyContent: "center", alignItems: "center"}} strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"/> : <div  ref={svgRef} style={{ position:'relative'}} />
     );
 }
 

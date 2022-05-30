@@ -4,7 +4,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import ThreeMeshUI from 'three-mesh-ui'
 import { TrackballControls } from 'three/examples/jsm/controls/TrackballControls'
 import './3DImageVisualization.css';
-import { SelectionBox } from "./SelectionBox"
+//import { SelectionBox } from "./SelectionBox"
 import { SelectionHelper } from './SelectionHelper';
 import React, {useRef, useEffect, useState} from "react";
 import axios from "axios";
@@ -16,16 +16,18 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {Button} from "primereact/button";
 import {ImNewspaper} from "react-icons/im";
 import {BsImage} from "react-icons/bs";
+import {ProgressSpinner} from "primereact/progressspinner";
 
 
 
 
-export const ThreeDImageVisualization = ({threeDImageData, applicationState, setApplicationState, pastApplicationState, pastNodeEdges, pastNodes, pastResultSearchNews, pastWordToNewsMap, setFilteredNews, setInitialFilteredNews, setKeywords, setLineChartFiltedredNews, setnodeEdges, setNodes, setPastApplicationState, setPastNodeEdges, setPastNodes, setPastResultSearchNews, setPastWordToNewsMap, setSearchTermHistory, setSelectedNewsId, setThreeDImageData, setWordsToNews}) => {
+export const ThreeDImageVisualization = ({threeDImageData, applicationState, setApplicationState, pastApplicationState, pastNodeEdges, pastNodes, pastResultSearchNews, pastWordToNewsMap, setFilteredNews, setInitialFilteredNews, setKeywords, setLineChartFiltedredNews, setnodeEdges, setNodes, setPastApplicationState, setPastNodeEdges, setPastNodes, setPastResultSearchNews, setPastWordToNewsMap, setSearchTermHistory, setSelectedNewsId, setThreeDImageData, setWordsToNews, loading, clusterKeywords}) => {
 
     const ref = useRef();
     let imageIndex = 0
     const [clickedImage, setClickedImage] = useState("")
     const [index, setIndex] = useState(0);
+    let ctrlKeyPressed = false
 
     const handleSelect = (selectedIndex, e) => {
         setIndex(selectedIndex);
@@ -141,6 +143,7 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
 
 
     let sceneSpheres = [];
+    let arrowHelperArray = []
     let additionalSphereKeywords = [];
     let lastIntersectedSpheres = []
     let createdPlanes = []
@@ -148,6 +151,7 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
     const widthMultiplier = 600
     const heightMultiplier = 600
     const depthMultiplier = 100
+    const sphereRadiusMultiplier = 22
 
 
 
@@ -188,9 +192,10 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
             scene.add( light );
 
 //Create a new directional light
-            var light = new THREE.DirectionalLight( 0xfdfcf0, 0.2 )
+            var light = new THREE.DirectionalLight( 0xfdfcf0, 0.4 )
             light.position.set(0,0,20)
             scene.add( light )
+
 
 
 
@@ -221,9 +226,12 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
             );
 
 
-            const selectionBox = new SelectionBox( camera, scene );
-            const helper = new SelectionHelper( selectionBox, renderer, 'selectBox' );
-            //scene.add(loader)
+
+            //const selectionBox = new SelectionBox( camera, scene );
+            //const helper = new SelectionHelper( selectionBox, renderer, 'selectBox' );
+
+            if(ctrlKeyPressed)
+            scene.add(loader)
 
 
             const texture = new THREE.TextureLoader().load('https://large.novasearch.org/nytimes/images/206cd0c3321f129171d53aca579372662e99b8f946c01d27c42e10a8daf42f47.jpg');
@@ -242,7 +250,9 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
                     texture.minFilter = THREE.LinearFilter;
 
                     const geometry = new THREE.PlaneGeometry(12, 12, 1);
-                    const material = new THREE.MeshBasicMaterial({map: texture});
+                    const material = new THREE.MeshPhysicalMaterial({map: texture});
+
+
 
                     const plane= new THREE.Mesh(geometry, material);
                     //texture.minFilter = THREE.NearestFilter
@@ -254,42 +264,28 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
 
             }
 
-            function createSmallPoints(response){
-                console.log(response)
 
-                for(var i = 0; i < threeDImageData.embeddings.length; i++){
-                    //const texture = new THREE.TextureLoader().load('https://large.novasearch.org/nytimes/images/206cd0c3321f129171d53aca579372662e99b8f946c01d27c42e10a8daf42f47.jpg');
-                    const geometry = new THREE.SphereGeometry(2, 100, 1);
-                    const material = new THREE.MeshBasicMaterial({color: "white"});
-                    const smallSphere = new THREE.Mesh(geometry, material);
-                    smallSphere.position.set(threeDImageData.embeddings[i][0] * widthMultiplier, threeDImageData.embeddings[i][1]*heightMultiplier, threeDImageData.embeddings[i][2] * depthMultiplier)
-                    scene.add(smallSphere)
+            renderer.domElement.addEventListener( 'mousedown', function ( event ) {
+
+                if (ctrlKeyPressed) {
+                    //for (const item of selectionBox.collection)
+                        //item.material.color.set(0xffffff);
+
+
+                    let canvasBounds = renderer.domElement.getBoundingClientRect();
+
+                    //selectionBox.startPoint.set(
+                        //((event.clientX - canvasBounds.left) / (canvasBounds.right - canvasBounds.left)) * 2 - 1,
+                        //-((event.clientY - canvasBounds.top) / (canvasBounds.bottom - canvasBounds.top)) * 2 + 1, 0);
+
+
+                    mouse.x = ((event.clientX - canvasBounds.left) / (canvasBounds.right - canvasBounds.left)) * 2 - 1;
+                    mouse.y = -((event.clientY - canvasBounds.top) / (canvasBounds.bottom - canvasBounds.top)) * 2 + 1;
+
                 }
-
-            }
-
-            function replaceSmallPointsForPanels(){
-
-            }
+            })
 
             renderer.domElement.addEventListener( 'click', function ( event ) {
-
-
-                for ( const item of selectionBox.collection ) {
-
-                    // item.material.color.set( 0xffffff );
-
-                }
-
-                let canvasBounds = renderer.domElement.getBoundingClientRect();
-
-                selectionBox.startPoint.set(
-                    ( ( event.clientX - canvasBounds.left ) / ( canvasBounds.right - canvasBounds.left ) ) * 2 - 1,
-                    - ( ( event.clientY - canvasBounds.top ) / ( canvasBounds.bottom - canvasBounds.top) ) * 2 + 1, 0);
-
-
-                mouse.x = ( ( event.clientX - canvasBounds.left ) / ( canvasBounds.right - canvasBounds.left ) ) * 2 - 1;
-                mouse.y = - ( ( event.clientY - canvasBounds.top ) / ( canvasBounds.bottom - canvasBounds.top) ) * 2 + 1;
 
                 raycaster.setFromCamera( mouse, camera );
                 const intersects = raycaster.intersectObjects(scene.children, true);
@@ -298,11 +294,15 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
                 console.log(intersects)
 
                 // se a interseção for maior do que 1 significa que clicou na esfera opaca e na fotografia com um só clique, ou seja, o clique apanha tanto a esfera opaca como a fotografia
-                if(intersects.length > 1 && intersects[1].object.geometry.type === 'PlaneGeometry' && intersects[0].object.geometry.type === 'SphereGeometry' && intersects[0].object.visible === false)
+                if(intersects.length > 1 && intersects[1].object.geometry.type === 'PlaneGeometry' && intersects[0].object.geometry.type === 'SphereGeometry' && intersects[0].object.visible === false && !intersects[0].object.arrowHelperSphere ){
                     flyToObject(intersects[1].object)
+                }
 
-                else if (intersects.length > 0 && (intersects[0].object.geometry.type === 'PlaneGeometry' || (intersects[0].object.geometry.type === 'SphereGeometry' && intersects[0].object.visible === true)))
+
+                else if (intersects.length > 0 && (intersects[0].object.geometry.type === 'PlaneGeometry' || (intersects[0].object.geometry.type === 'SphereGeometry' && intersects[0].object.visible === true  && !intersects[0].object.arrowHelperSphere ))){
                     flyToObject(intersects[0].object)
+                }
+
 
 
 
@@ -311,53 +311,59 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
 
             renderer.domElement.addEventListener( 'pointermove', function ( event ) {
 
-                if ( helper.isDown ) {
-
-                    //for ( let i = 0; i < selectionBox.collection.length; i ++ ) {
-
-                    // selectionBox.collection[ i ].material.color.set( 0x000000 );
-
-                    console.log("asdasd")
-
-                    //}
-
-
-                    let canvasBounds = renderer.domElement.getBoundingClientRect();
-
-                    selectionBox.endPoint.set(
-                        ((event.clientX - canvasBounds.left) / (canvasBounds.right - canvasBounds.left)) * 2 - 1,
-                        -((event.clientY - canvasBounds.top) / (canvasBounds.bottom - canvasBounds.top)) * 2 + 1, 0);
-
-
-                    const allSelected = selectionBox.select();
-
-                    // for ( let i = 0; i < allSelected.length; i ++ ) {
-
-                    //   allSelected[ i ].material.color.set( 0xffffff );
-
-                    // }
-
-
-                }
+                // if ( helper.isDown ) {
+                //
+                //     //for ( let i = 0; i < selectionBox.collection.length; i ++ ) {
+                //
+                //     // selectionBox.collection[ i ].material.color.set( 0x000000 );
+                //
+                //     console.log("asdasd")
+                //
+                //     //}
+                //
+                //
+                //     if(ctrlKeyPressed) {
+                //         let canvasBounds = renderer.domElement.getBoundingClientRect();
+                //
+                //         selectionBox.endPoint.set(
+                //             ((event.clientX - canvasBounds.left) / (canvasBounds.right - canvasBounds.left)) * 2 - 1,
+                //             -((event.clientY - canvasBounds.top) / (canvasBounds.bottom - canvasBounds.top)) * 2 + 1, 0);
+                //
+                //         console.log("eventX", (event.clientX - canvasBounds.left) / (canvasBounds.right - canvasBounds.left) * 2 - 1)
+                //         console.log("eventY", -((event.clientY - canvasBounds.top) / (canvasBounds.bottom - canvasBounds.top)) * 2 + 1)
+                //
+                //         const allSelected = selectionBox.select();
+                //
+                //         console.log("allSelected", allSelected)
+                //
+                //         // for (let i = 0; i < allSelected.length; i++) {
+                //         //
+                //         //     allSelected[i].material.color.set(0x000000);
+                //         //
+                //         // }
+                //     }
+                //
+                // }
             })
 
             renderer.domElement.addEventListener( 'pointerup', function ( event ) {
-                let canvasBounds = renderer.domElement.getBoundingClientRect();
+                if(ctrlKeyPressed) {
+                    let canvasBounds = renderer.domElement.getBoundingClientRect();
 
-                selectionBox.endPoint.set(
-                    ( ( event.clientX - canvasBounds.left ) / ( canvasBounds.right - canvasBounds.left ) ) * 2 -1,
-                    - ( ( event.clientY - canvasBounds.top ) / ( canvasBounds.bottom - canvasBounds.top) ) * 2 + 1, 0);
+                    //selectionBox.endPoint.set(
+                        //((event.clientX - canvasBounds.left) / (canvasBounds.right - canvasBounds.left)) * 2 - 1,
+                        //-((event.clientY - canvasBounds.top) / (canvasBounds.bottom - canvasBounds.top)) * 2 + 1, 0);
 
 
+                    //const allSelected = selectionBox.select();
 
-                const allSelected = selectionBox.select();
+                    //for (let i = 0; i < allSelected.length; i++) {
 
-                for ( let i = 0; i < allSelected.length; i ++ ) {
+                        //allSelected[ i ].material.color.set( 0x000000 );
 
-                    //allSelected[ i ].material.color.set( 0x000000 );
-
+                    //}
+                    console.log(camera.position)
                 }
-                console.log(camera.position)
 
             } );
 
@@ -378,20 +384,20 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
 
                     for(let i = 0; i < intersects.length; i++){
 
-
-
-                    console.log("intersects", intersects)
+                    //console.log("intersects", intersects)
                     if (intersects[i].object.geometry.type === 'PlaneGeometry'){
                         //console.log(intersects[0] + "    " + threeDImageData.newsIds.length)
                         const indexOfImage = intersects[i].object.indexOfImage
+                        //console.log("index da image", indexOfImage)
                         const newsIdAndImagePosition =  threeDImageData.newsIds[indexOfImage]
 
                         const newsId = newsIdAndImagePosition.split("_")[0]
                          imageIndex = newsIdAndImagePosition.split("_")[1]
-                        console.log("este é o imageIndex")
-                        console.log(imageIndex)
+                        //console.log("este é o imageIndex")
+                        //console.log(imageIndex)
 
                         const news = threeDImageData.searchWordResult.body.hits.hits
+                        console.log("news do 150", news[150])
 
                         for(let l = 0; l < news.length; l++){
                                 if(news[l]._id == newsId){
@@ -399,9 +405,9 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
                                     newsImageAndIndex[0] = news[l]
                                     newsImageAndIndex[1] = imageIndex
                                     setClickedImage(newsImageAndIndex)
-                                    console.log("true")
-                                    console.log(news[l])
-                                    console.log(newsImageAndIndex)
+                                    //console.log("true")
+                                    console.log("KEYWORDS", news[l]._source.keywords)
+                                    //console.log(newsImageAndIndex)
                                  }
                          }
                         }
@@ -419,12 +425,11 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
                         const sphere = intersects[0].object;
                         const spherePosition = intersects[0].object.position;
                         const sphereRadius = intersects[0].object.geometry.parameters.radius;
+                        console.log("sphereIndex", sphere.index)
 
-                        if(!sphere.hasKeywords){
+                        if(!sphere.hasKeywords && !sphere.arrowHelperSphere){
                             addAdditionalKeywordsToSpheres(sphere, spherePosition, sphereRadius)
                         }
-
-
 
                     }
 
@@ -442,6 +447,16 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
                 }
 
             })
+
+            // key handler
+            // document.onkeydown = function(e) {
+            //     //e.preventDefault();
+            //     if (e.ctrlKey ) {             // left
+            //         console.log("ola")
+            //         controls.noPan = !controls.noPan
+            //         ctrlKeyPressed = controls.noPan
+            //     }
+            // };
 
             function onMouseWheel(event) {
 
@@ -473,30 +488,57 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
 
                                 console.log(threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2])
                                 console.log(threeDImageData.embeddings[indexesOfImagesInsideSphere])
-                                if(camera.position.z - (threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier) < 70 && createdPlanes[i] != undefined && createdPlanes[i][j] != undefined && createdPlanes[i][j].showingHighQualityImage == false ){
+                                if(camera.position.z - (threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier) < 135 && createdPlanes[i] != undefined && createdPlanes[i][j] != undefined && createdPlanes[i][j].showingHighQualityImage == false ){
 
 
+                                    const newsIdAndImagePosition =  threeDImageData.newsIds[indexesOfImagesInsideSphere[j]]
 
-                                        const geometry = new THREE.PlaneGeometry(12, 12, 1);
-                                        const texture = new THREE.TextureLoader().load('./pre_highQuality/transferir.jpg');
-                                        //const texture = new THREE.CanvasTexture(imageBitmap);
+                                    //const newsIdAndImagePosition =  threeDImageData.newsIds[indexOfImage]
+
+                                    const newsId = newsIdAndImagePosition.split("_")[0]
+                                    imageIndex = newsIdAndImagePosition.split("_")[1]
+
+                                    const news = threeDImageData.searchWordResult.body.hits.hits
+                                    console.log("news do 150", news[150])
+                                    let newsImageAndIndex = []
+
+                                    for(let l = 0; l < news.length; l++){
+                                        if(news[l]._id == newsId){
+
+                                            newsImageAndIndex[0] = news[l]
+                                            newsImageAndIndex[1] = imageIndex
+                                            setClickedImage(newsImageAndIndex)
+                                            //console.log("true")
+                                            console.log("KEYWORDS", news[l]._source.keywords)
+                                            //console.log(newsImageAndIndex)
+                                        }
+                                    }
 
 
+                                    const geometry = new THREE.PlaneGeometry(12, 12, 1);
+                                    const texture = new THREE.TextureLoader().load("https://large.novasearch.org/nytimes/images/" + newsImageAndIndex[0]._source.parsed_section[newsImageAndIndex[0]._source.image_positions[newsImageAndIndex[1]]].hash + ".jpg");
+
+                                    // texture.magFilter = THREE.LinearFilter;
+                                    // texture.minFilter = THREE.LinearFilter;
+                                    // texture.needsUpdate = true;
+
+                                    const material = new THREE.MeshPhysicalMaterial({map: texture});
+                                    const plane = new THREE.Mesh(geometry, material);
 
                                         // texture.magFilter = THREE.LinearFilter;
                                         // texture.minFilter = THREE.LinearFilter;
                                         // texture.needsUpdate = true;
 
-                                        const material = new THREE.MeshBasicMaterial({map: texture});
-                                        const plane = new THREE.Mesh(geometry, material);
 
                                         plane.showingBadQualityImage = true
                                         plane.showingMediumQualityImage = true
                                         plane.showingHighQualityImage = true
-                                        plane.indexOfImage = j
+                                        plane.indexOfImage = indexesOfImagesInsideSphere[j]
+
+                                        const sphereRadius = parseInt(sceneSpheres[i].geometry.parameters.radius)
 
                                         planeTest = plane
-                                        plane.position.set(threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][0] * widthMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][1] * heightMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier)
+                                        plane.position.set(threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][0] * widthMultiplier + sphereRadius * sphereRadiusMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][1] * heightMultiplier + sphereRadius * sphereRadiusMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier)
                                         //plane.position.set(Math.random()* 400, Math.random() * 400, Math.random() * 100)
                                         const planeMesh = createdPlanes[i][j]
                                         //console.log(planeMesh)
@@ -509,50 +551,71 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
                                         scene.add(plane)
 
                                     console.log("pre3")
+
                                 }
-                                 if(camera.position.z - (threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier) < 150 && createdPlanes[i] != undefined && createdPlanes[i][j] != undefined && createdPlanes[i][j].showingMediumQualityImage == false  && createdPlanes[i][j].showingHighQualityImage == false){
+                                 if(camera.position.z - (threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier) < 230 && createdPlanes[i] != undefined && createdPlanes[i][j] != undefined && createdPlanes[i][j].showingMediumQualityImage == false  && createdPlanes[i][j].showingHighQualityImage == false){
 
 
-                                    console.log("kkkkkkkkkkkkkkkkkkkkkkk entrei no medium")
+                                     const newsIdAndImagePosition =  threeDImageData.newsIds[indexesOfImagesInsideSphere[j]]
+
+                                     //const newsIdAndImagePosition =  threeDImageData.newsIds[indexOfImage]
+
+                                     const newsId = newsIdAndImagePosition.split("_")[0]
+                                     imageIndex = newsIdAndImagePosition.split("_")[1]
+
+                                     const news = threeDImageData.searchWordResult.body.hits.hits
+                                     console.log("news do 150", news[150])
+                                     let newsImageAndIndex = []
+
+                                     for(let l = 0; l < news.length; l++){
+                                         if(news[l]._id == newsId){
+
+                                             newsImageAndIndex[0] = news[l]
+                                             newsImageAndIndex[1] = imageIndex
+                                             setClickedImage(newsImageAndIndex)
+                                             //console.log("true")
+                                             console.log("KEYWORDS", news[l]._source.keywords)
+                                             //console.log(newsImageAndIndex)
+                                         }
+                                     }
 
 
-                                    const planeMesh = createdPlanes[i][j]
-                                    planeMesh.geometry.dispose();
-                                    planeMesh.material.dispose();
-                                    console.log("removi")
-                                    scene.remove(planeMesh);
+                                     const geometry = new THREE.PlaneGeometry(12, 12, 1);
+                                     const texture = new THREE.TextureLoader().load("https://large.novasearch.org/nytimes/images/" + newsImageAndIndex[0]._source.parsed_section[newsImageAndIndex[0]._source.image_positions[newsImageAndIndex[1]]].hash + ".jpg");
+
+                                     // texture.magFilter = THREE.LinearFilter;
+                                     // texture.minFilter = THREE.LinearFilter;
+                                     // texture.needsUpdate = true;
+
+                                     const material = new THREE.MeshPhysicalMaterial({map: texture});
+                                     const plane = new THREE.Mesh(geometry, material);
+
+                                     // texture.magFilter = THREE.LinearFilter;
+                                     // texture.minFilter = THREE.LinearFilter;
+                                     // texture.needsUpdate = true;
 
 
+                                     plane.showingBadQualityImage = true
+                                     plane.showingMediumQualityImage = true
+                                     plane.showingHighQualityImage = false
+                                     plane.indexOfImage = indexesOfImagesInsideSphere[j]
 
-                                    const geometry = new THREE.PlaneGeometry(12, 12, 1);
-                                    const texture = new THREE.TextureLoader().load('./pre_mediumQuality/003d3159614e83d323610c2613bd93d21b1732affed6a642bc6338094a9c42cf-min.jpg');
-                                    //const texture = new THREE.CanvasTexture(imageBitmap);
+                                     const sphereRadius = parseInt(sceneSpheres[i].geometry.parameters.radius)
 
+                                     planeTest = plane
+                                     plane.position.set(threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][0] * widthMultiplier + sphereRadius * sphereRadiusMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][1] * heightMultiplier + sphereRadius * sphereRadiusMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier)
+                                     //plane.position.set(Math.random()* 400, Math.random() * 400, Math.random() * 100)
+                                     const planeMesh = createdPlanes[i][j]
+                                     //console.log(planeMesh)
+                                     planeMesh.geometry.dispose();
+                                     planeMesh.material.dispose();
+                                     texture.dispose();
+                                     scene.remove(planeMesh);
 
+                                     createdPlanes[i][j] = plane
+                                     scene.add(plane)
 
-                                    // texture.magFilter = THREE.LinearFilter;
-                                    // texture.minFilter = THREE.LinearFilter;
-                                    // texture.needsUpdate = true;
-
-                                    const material = new THREE.MeshBasicMaterial({map: texture});
-                                    const plane = new THREE.Mesh(geometry, material);
-
-                                    plane.showingBadQualityImage = true
-                                    plane.showingMediumQualityImage = true
-                                    plane.showingHighQualityImage = false
-                                     plane.indexOfImage = j
-
-                                    planeTest = plane
-                                    plane.position.set(threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][0] * widthMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][1] * heightMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier)
-                                    //plane.position.set(Math.random()* 400, Math.random() * 400, Math.random() * 100)
-
-                                    createdPlanes[i][j] = plane
-
-                                    //console.log(planeMesh)
-
-
-
-                                    scene.add(plane)
+                                     console.log("pre3")
 
                                 }
                             }
@@ -613,8 +676,17 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
 
 
                             }
-                            sceneSpheres[i].visible = true
-                            sceneSpheres[i].clicked = false
+                            console.log("createdPlanes", createdPlanes)
+                            //console.log("createdPlanes[0]", createdPlanes[0])
+                            //console.log("createdPlanes[0].length", createdPlanes[0].length)
+                            //&& createdPlanes[0] != undefined && createdPlanes[0].length == 0
+                            if(createdPlanes != undefined ){
+
+                                console.log("createdPlanes", createdPlanes)
+                                sceneSpheres[i].visible = true
+                                sceneSpheres[i].clicked = false
+                            }
+
                         }
                     }
                 }
@@ -786,44 +858,68 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
             //             content: "Known for its extremely keeled dorsal scales that give it a ",
             //         }),
 
-            function getNewInstance(){
+            function getNewInstance(keyword) {
+
+
+                console.log("clusterkeywords", clusterKeywords)
+
+                if ( keyword != undefined) {
+
+                console.log("vamos ver se dá", keyword)
                 instance = new TextSprite({
                     alignment: 'center',
                     color: '#db4035',
                     fontFamily: '"Times New Roman", Times, serif',
-                    fontSize: 20,
+                    fontSize: 15,
                     fontWeight: "900",
                     fontStyle: 'areal',
                     text: [
-                        'Cats',
+                        keyword,
 
 
                     ].join('\n'),
                 });
                 return instance
             }
+            return ""
+        }
 
 
             function addAdditionalKeywordsToSpheres(sphere, spherePosition, sphereRadius){
+
+                const mostCommonKeywordsArray = getMostCommonKeywords(sphere, sphere.index)
+
+                console.log("moas common keywords", mostCommonKeywordsArray)
+
+
                 sphere.hasKeywords = true
-                instance = getNewInstance()
-                instance.position.set(spherePosition.x + sphereRadius + 25, spherePosition.y, spherePosition.z)
-                additionalSphereKeywords.push(instance)
-                scene.add(instance)
+                instance = getNewInstance(mostCommonKeywordsArray[1][0])
+                if(instance != ""){
+                    const wordDistance = instance.text.length * 3.5
+                    instance.position.set(spherePosition.x + sphereRadius + 7 + wordDistance, spherePosition.y, spherePosition.z)
+                    additionalSphereKeywords.push(instance)
+                    scene.add(instance)
+                }
 
 
 
-                instance = getNewInstance()
-                instance.position.set(spherePosition.x - sphereRadius - 25, spherePosition.y, spherePosition.z)
-                additionalSphereKeywords.push(instance)
-                scene.add(instance)
+
+                instance = getNewInstance(mostCommonKeywordsArray[2][0])
+                if(instance != "") {
+                    const wordDistance = instance.text.length * 3.5
+                    instance.position.set(spherePosition.x - sphereRadius - 7 - wordDistance, spherePosition.y, spherePosition.z)
+                    additionalSphereKeywords.push(instance)
+                    scene.add(instance)
+                }
 
 
 
-                getNewInstance()
-                instance.position.set(spherePosition.x, spherePosition.y - sphereRadius - 10, spherePosition.z)
-                additionalSphereKeywords.push(instance)
-                scene.add(instance)
+                getNewInstance(mostCommonKeywordsArray[3][0])
+                if(instance != "") {
+                    instance.position.set(spherePosition.x, spherePosition.y - sphereRadius - 10, spherePosition.z)
+                    additionalSphereKeywords.push(instance)
+                    scene.add(instance)
+                }
             }
 
             function removeAdditionalKeywordsInSpheres(){
@@ -899,30 +995,7 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
 
 
 
-//             const dir = new THREE.Vector3(planeTest.position.x, planeTest.position.y, planeTest.position.z);
-// //normalize the direction vector (convert to vector of length 1)
-//             dir.normalize();
 
-
-            const origin = new THREE.Vector3( 0, 0, 100 );
-            const length = 50;
-            const hex = 0x004999;
-
-
-            // const arrowHelper = new THREE.ArrowHelper( dir, origin, length, hex );
-            // arrowHelper.line.visible = false
-            // arrowHelper.setLength (50, 20, 12)
-            // console.log(arrowHelper.cone)
-            // scene.add( arrowHelper );
-
-            const sphere = new THREE.Mesh(new THREE.SphereGeometry(15, 50, 100),
-                new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load('./news.jpg')}))
-
-
-
-
-
-            scene.add( sphere );
 
             //scene.add( clusterSphere );
 
@@ -953,15 +1026,10 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
                 }
 
 
-
-
-
-
-
                 for(let i = 0; i < threeDImageData.clustersPoints.length; i+= 6){
                     const clusterPoints = threeDImageData.clustersPoints
                     const midwayPoints = new THREE.Vector3((((clusterPoints[i+1] - clusterPoints[i])) * widthMultiplier) / 2, (((clusterPoints[i+3] - clusterPoints[i+2])) * heightMultiplier) / 2, (((clusterPoints[i+5] - clusterPoints[i+4]) * depthMultiplier) / 2))
-                    const sphereCenter = new THREE.Vector3(((((clusterPoints[i+1] - clusterPoints[i]) / 2) + clusterPoints[i]) * widthMultiplier), ((((clusterPoints[i+3] - clusterPoints[i+2]) / 2) + clusterPoints[i+2]) * heightMultiplier), ((((clusterPoints[i+5] - clusterPoints[i+4]) / 2) + clusterPoints[i+4]) * depthMultiplier));
+                    const sphereCenter = new THREE.Vector3(((((clusterPoints[i+1] + clusterPoints[i]) / 2) ) * widthMultiplier), ((((clusterPoints[i+3] + clusterPoints[i+2]) / 2) ) * heightMultiplier), ((((clusterPoints[i+5] + clusterPoints[i+4]) / 2)) * depthMultiplier));
                     const sphereRadius = Math.sqrt((midwayPoints.x ** 2) + (midwayPoints.y ** 2) + (midwayPoints.z ** 2))
                     console.log("este é o raio da esfera")
                     console.log(sphereRadius)
@@ -969,7 +1037,7 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
                     console.log(sphereCenter)
 
                     clusterSphere = new THREE.Mesh(new THREE.SphereGeometry(sphereRadius, 50, 500),
-                        new THREE.MeshBasicMaterial({
+                        new THREE.MeshPhysicalMaterial({
                             transparent: true,
                             opacity: 1.0,
                             map: new THREE.TextureLoader().load('./news.jpg')
@@ -978,41 +1046,68 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
                     // tem de ser i%6 porque o cluster points(for de cima) aumenta de 6 em 6 e o clusterIndexes aumenta de 1 em 1
 
 
-                    clusterSphere.position.set(sphereCenter.x, sphereCenter.y, sphereCenter.z)
+                    clusterSphere.position.set(sphereCenter.x  + sphereRadius * sphereRadiusMultiplier, sphereCenter.y + sphereRadius * sphereRadiusMultiplier, sphereCenter.z)
                     console.log("entrei neste for que me esta a irritar eae")
                     let ballGeo = new THREE.SphereGeometry(sphereRadius, 64, 30)
                     let ballMat = new THREE.MeshPhysicalMaterial(ballMaterial)
                     let ballMesh = new THREE.Mesh(ballGeo, ballMat)
                     ballMesh.position.set(clusterSphere.position.x, clusterSphere.position.y, clusterSphere.position.z);
                     ballMesh.hasKeywords = false;
+                    ballMesh.index = i/6
                     ballMesh.pointsIndexes = threeDImageData.clusterIndexes[i/6]
                     ballMesh.material.opacity = 0.2;
+
+                    const mostCommonKeywords = getMostCommonKeywords(ballMesh)
 
                     let instance = new TextSprite({
                         alignment: 'center',
                         color: '#db4035',
                         fontFamily: '"Times New Roman", Times, serif',
-                        fontSize: 20,
+                        fontSize: 15,
                         fontWeight: "900",
                         fontStyle: 'areal',
                         text: [
-                            'Cats',
-
+                            mostCommonKeywords[0][0],
 
                         ].join('\n'),
                     });
 
-                    instance.position.set(sphereCenter.x,sphereCenter.y + sphereRadius + 10, sphereCenter.z)
-                    console.log(instance)
-                    console.log(instance.scale)
+                    instance.position.set(sphereCenter.x + sphereRadius * sphereRadiusMultiplier,sphereCenter.y + sphereRadius + 10 + sphereRadius * sphereRadiusMultiplier, sphereCenter.z)
                     scene.add(instance)
                     scene.add(ballMesh)
                     sceneSpheres.push(ballMesh)
                 }
 
 
-                console.log("esta é a clustersphere")
-                // eslint-disable-next-line no-unused-expressions
+
+
+                for(let i = 0; i < sceneSpheres.length; i++){
+
+                    const dir = new THREE.Vector3(sceneSpheres[i].position.x, sceneSpheres[i].position.y, sceneSpheres[i].position.z);
+                    //normalize the direction vector (convert to vector of length 1)
+                    dir.normalize();
+
+                    const origin = new THREE.Vector3( camera.position.x, camera.position.y + updatedHeightFov / 2 - 100, 100 );
+                    const length = 50;
+                    const hex = 0x004999;
+
+
+                    const arrowHelper = new THREE.ArrowHelper( dir, origin, length, hex );
+                    arrowHelper.line.visible = false
+                    arrowHelper.setLength (50, 20, 12)
+                    console.log(arrowHelper.cone)
+                    scene.add( arrowHelper );
+                    //arrowHelperArray[0].position.x = camera.position.x //- 200
+                    //arrowHelperArray[0].position.y = camera.position.y + updatedHeightFov / 2 - 100;
+                    arrowHelperArray.push(arrowHelper)
+
+
+                    console.log("esta é a clustersphere")
+                    // eslint-disable-next-line no-unused-expressions
+
+
+                }
+
 
 
             })
@@ -1030,7 +1125,7 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
                 alignment: 'center',
                 color: '#db4035',
                 fontFamily: '"Times New Roman", Times, serif',
-                fontSize: 20,
+                fontSize: 15,
                 fontWeight: "900",
                 fontStyle: 'areal',
                 text: [
@@ -1137,29 +1232,53 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
 
                 for(let j = 0; j < indexesOfImagesInsideSphere.length; j++){
 
-                    //const texture = new THREE.TextureLoader().load('https://large.novasearch.org/nytimes/images/206cd0c3321f129171d53aca579372662e99b8f946c01d27c42e10a8daf42f47.jpg');
-                    //const texture = GLTLloader.load('https://large.novasearch.org/nytimes/images/206cd0c3321f129171d53aca579372662e99b8f946c01d27c42e10a8daf42f47.jpg');
-
                     //talvez mudar só para loader
-
-                        //./ExampleImage.jpg
-                        //https://large.novasearch.org/nytimes/images/206cd0c3321f129171d53aca579372662e99b8f946c01d27c42e10a8daf42f47.jpg
+                    console.log("indexesdasimagesdentrodaesfera", indexesOfImagesInsideSphere)
+                    console.log("aba", threeDImageData)
 
                         // onLoad callback
+                    const newsIdAndImagePosition =  threeDImageData.newsIds[indexesOfImagesInsideSphere[j]]
+
+                    //const newsIdAndImagePosition =  threeDImageData.newsIds[indexOfImage]
+
+                    const newsId = newsIdAndImagePosition.split("_")[0]
+                    imageIndex = newsIdAndImagePosition.split("_")[1]
+                    //console.log("este é o imageIndex")
+                    //console.log(imageIndex)
+
+                    const news = threeDImageData.searchWordResult.body.hits.hits
+                    console.log("news do 150", news[150])
+                    let newsImageAndIndex = []
+
+                    for(let l = 0; l < news.length; l++){
+                        if(news[l]._id == newsId){
+
+                            newsImageAndIndex[0] = news[l]
+                            newsImageAndIndex[1] = imageIndex
+                            setClickedImage(newsImageAndIndex)
+                            //console.log("true")
+                            console.log("KEYWORDS", news[l]._source.keywords)
+                            //console.log(newsImageAndIndex)
+                        }
+                    }
+
 
                     const geometry = new THREE.PlaneGeometry(12, 12, 1);
-                    const texture = new THREE.TextureLoader().load('./pre_badQuality/003d3159614e83d323610c2613bd93d21b1732affed6a642bc6338094a9c42cf-min.jpg');
+                    const texture = new THREE.TextureLoader().load("https://large.novasearch.org/nytimes/images/" + newsImageAndIndex[0]._source.parsed_section[newsImageAndIndex[0]._source.image_positions[newsImageAndIndex[1]]].hash + ".jpg");
 
                             // texture.magFilter = THREE.LinearFilter;
                             // texture.minFilter = THREE.LinearFilter;
                             // texture.needsUpdate = true;
 
-                            const material = new THREE.MeshBasicMaterial( { map: texture } );
+                            const material = new THREE.MeshPhysicalMaterial( { map: texture } );
                             const plane= new THREE.Mesh(geometry, material);
+                            const sphereRadius = parseInt(sceneSpheres[i].geometry.parameters.radius)
+
+
 
 
                             planeTest = plane
-                            plane.position.set(threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][0] * widthMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][1] * heightMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier)
+                            plane.position.set((threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][0] * widthMultiplier) + sphereRadius * sphereRadiusMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][1] * heightMultiplier + sphereRadius * sphereRadiusMultiplier, threeDImageData.embeddings[indexesOfImagesInsideSphere[j]][2] * depthMultiplier)
                             //plane.position.set(Math.random()* 400, Math.random() * 400, Math.random() * 100)
                             if(createdPlanes[i] == undefined)
                                 createdPlanes[i] = []
@@ -1168,7 +1287,8 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
                             plane.showingBadQualityImage = false
                             plane.showingMediumQualityImage = false
                             plane.showingHighQualityImage = false
-                            plane.indexOfImage = j
+                    console.log("abcd", indexesOfImagesInsideSphere)
+                            plane.indexOfImage = indexesOfImagesInsideSphere[j]
                             createdPlanes[i].push(plane)
                             scene.add(plane)
 
@@ -1177,8 +1297,6 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
 
                 }
 
-                console.log("esta é a primeira scene")
-                console.log(scene.children)
             }
 
             function flyToObject(clickedObject) {
@@ -1236,7 +1354,8 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
 
                 if(clickedObject.geometry.type === 'PlaneGeometry')
                     controls.target.set(objectPosition.x, objectPosition.y, objectPosition.z + 30)
-                else if(clickedObject.geometry.type === 'SphereGeometry'){
+                else if(clickedObject.geometry.type === 'SphereGeometry' ){
+                    console.log(clickedObject)
                     const sphereRadius = clickedObject.geometry.boundingSphere.radius
                     controls.target.set(objectPosition.x, objectPosition.y, objectPosition.z + sphereRadius + 100)
                     const indexesOfImagesInsideSphere = clickedObject.pointsIndexes
@@ -1265,16 +1384,6 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
                     THREE.Quaternion.slerp(q0, camera2.quaternion, camera.quaternion, deg);
                     //console.log(camera.position)
                     lastPosition = camera.position
-                    // console.log(lastPosition)
-
-
-                    //console.log("entrei no update")
-                    //camera.position.x = controls.target.x;
-                    //camera.position.y = controls.target.y;
-                    //camera.position.z = controls.target.z;
-                    // console.log(camera.position)
-                    // console.log(controls.target)
-                    // console.log(planeTest.position)
 
                 });
                 tween.onComplete(function (){
@@ -1297,16 +1406,6 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
                         removeAdditionalKeywordsInSpheres();
                     }
 
-                    //camera.position.set(0, 0 ,1000)
-                    // camera.translateX(controls.target.x)
-                    // camera.translateY(controls.target.y)
-
-                    //controls.quaternion0 =1000
-                    //controls.update()
-                    // controls.enabled = true;
-                    // controls.update();
-                    //controls2 = new TrackballControls(camera, renderer.domElement);
-                    //controls.reset()
 
                 })
 
@@ -1365,7 +1464,54 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
             //         controls.update();
             // }})}
 
+            function getMostCommonKeywords(sphere){
 
+
+
+                const indexesOfImagesInsideSphere = sphere.pointsIndexes
+                const news = threeDImageData.searchWordResult.body.hits.hits
+
+                let keywordsMap = new Map()
+
+                for(let i = 0; i < indexesOfImagesInsideSphere.length; i++) {
+
+                    if(news[indexesOfImagesInsideSphere[i]] != undefined)
+                    for (let k = 0; k < news[indexesOfImagesInsideSphere[i]]._source.keywords.length; k++) {
+
+
+                        console.log("clusterPre", news[indexesOfImagesInsideSphere[i]])
+                        let newsSet = keywordsMap.get(news[indexesOfImagesInsideSphere[i]]._source.keywords[k].value)
+
+                        if (newsSet != undefined)
+                            newsSet.push(i)
+                        else
+                            newsSet = [i]
+
+                        keywordsMap.set(news[indexesOfImagesInsideSphere[i]]._source.keywords[k].value, newsSet)
+                        keywordsMap[Symbol.iterator] = function* () {
+                            yield* [...keywordsMap.entries()].sort((a, b) => b[1].length - a[1].length);
+                        }
+                    }
+                }
+
+                const obj = Object.fromEntries(keywordsMap);
+
+                return Object.entries(obj).slice(0, 4)
+            }
+
+
+
+
+
+
+
+            const sphere = new THREE.Mesh(new THREE.SphereGeometry(15, 50, 100),
+                new THREE.MeshPhysicalMaterial({map: new THREE.TextureLoader().load('./news.jpg')}))
+
+
+
+            sphere.arrowHelperSphere = true
+            scene.add( sphere );
 
 
 
@@ -1413,10 +1559,19 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
                 sphere.position.x =  camera.position.x;
                 sphere.position.y =  camera.position.y + initialHeightFov / 2 - 100;
                 sphere.position.z = 100
-                // arrowHelper.position.x = camera.position.x //- width/2
-                // arrowHelper.position.y = camera.position.y + heightFov / 2 - 100;
-                // arrowHelper.setDirection(new THREE.Vector3(planeTest.position.x - camera.position.x, planeTest.position.y - camera.position.y - heightFov / 2 + 100, planeTest.position.z).normalize())
+
+                if(arrowHelperArray != []){
+                    for(let i = 0; i < arrowHelperArray.length; i++){
+
+
+                        arrowHelperArray[i].position.x = camera.position.x //- 200
+                        arrowHelperArray[i].position.y = camera.position.y + initialHeightFov / 2 - 100;
+                        arrowHelperArray[i].setDirection(new THREE.Vector3(sceneSpheres[i].position.x - camera.position.x, sceneSpheres[i].position.y - camera.position.y - updatedHeightFov / 2 + 100, sceneSpheres[i].position.z).normalize())
+                    }
+                }
             }
+
+
 
             function returnKeywords(){
 
@@ -1464,8 +1619,9 @@ export const ThreeDImageVisualization = ({threeDImageData, applicationState, set
 
 
     return(
+        loading ? <ProgressSpinner style={{paddingTop:"50%" ,width: '50px', height: '50px', display: "flex", justifyContent: "center", alignItems: "center"}} strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"/> :
         <>
-            <div id={"threeDImageVisualization"} key = {key} ref={ref} style={{width: '100px', height: '100px', position:'relative'}}>
+             <div id={"threeDImageVisualization"} key = {key} ref={ref} style={{width: '100px', height: '100px', position:'relative'}}>
                 {clickedImage!= "" ? (<div id="overlay">
                     <Card border="secondary" key={1}  style={{width: '220px', marginTop: '15px', marginLeft: '15px'}}>
                         <Carousel nextLabel='none' nextIcon= '' prevIcon='' style={{borderRadius: '50%'}} interval={null}>

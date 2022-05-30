@@ -1,11 +1,12 @@
 import React, {useEffect, useRef, useState} from "react";
 
 import * as d3 from 'd3';
+import {ProgressSpinner} from "primereact/progressspinner";
 
 
 
 
-export const HorizontalBarChart = ({keywords, filteredNews, setFilteredNews, setLineChartFiltedredNews, lineChartFiltedredNews}) => {
+export const HorizontalBarChart = ({keywords, filteredNews, setFilteredNews, setLineChartFiltedredNews, lineChartFiltedredNews, loading}) => {
 
 
     console.log("estas são as keywords")
@@ -46,8 +47,8 @@ export const HorizontalBarChart = ({keywords, filteredNews, setFilteredNews, set
 
 
         // set the dimensions and margins of the graph
-        const margin = {top: 20, right: 30, bottom: 40, left: 150},
-            width = 460 - margin.left - margin.right,
+        const margin = {top: 40, right: 30, bottom: 40, left: 200},
+            width = 570 - margin.left - margin.right,
             height = 400 - margin.top - margin.bottom;
 
 
@@ -91,7 +92,7 @@ export const HorizontalBarChart = ({keywords, filteredNews, setFilteredNews, set
                 svg.selectAll("myRect")
                     .data(keywords)
                     .join("rect")
-                    .attr("x", x(0.1))
+                    .attr("x", x(0.01))
                     .attr("y", (d => y(d[0]))) //d => y(d.Country)
                     .attr("width",(d => x(d[1].length)))// d => x(d.Value)
                     .attr("height", y.bandwidth())
@@ -118,19 +119,30 @@ export const HorizontalBarChart = ({keywords, filteredNews, setFilteredNews, set
                         setFilteredNews(filteredNewsToSet)
                         setLineChartFiltedredNews(filteredNewsToSet)
                     })
+
+            svg.append("text")
+                .attr("x", (width / 2))
+                .attr("y", height + (margin.top))
+                .attr("text-anchor", "middle")
+                .attr("font-weight",function(d,i) {return 100;})
+                .attr("font-family", "Saira")
+                .style("font-size", "14px")
+                .text("Number of news");
+
+
             console.log("isto foi chamado")
 
 
         }
 
 
-    }, [keywords, lineChartFiltedredNews]);
+    }, [keywords, lineChartFiltedredNews, loading]);
 
 
 
     return (
 
-        <div style={{marginLeft: '4%'}} ref={svgRef}/>
+        loading ? <ProgressSpinner style={{paddingTop:"50%", width: '50px', height: '50px', display: "flex", justifyContent: "center", alignItems: "center"}} strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"/> : <div style={{display: "flex", justifyContent: "center", alignItems: "center"}} ref={svgRef}/>
     );
 }
 export default HorizontalBarChart;

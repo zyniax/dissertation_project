@@ -2,12 +2,10 @@ import React, {useEffect, useRef, useState} from "react";
 import Tooltip from "../Tooltip/Tooltip";
 import Chart_Pie from "./ChartPie/ChartPie";
 import {Card, Col, Row, Carousel, Container} from "react-bootstrap";
-import HorizontalBarChart from "./HorizontalBarChart/HorizontalBarChart";
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 import * as d3 from 'd3';
-import RelevantHeadlines from "./RelevantHeadlines/RelevantHeadlines";
-import {BsImage} from "react-icons/bs";
-import {ImNewspaper} from "react-icons/im";
+import axios from "axios";
 
 
 
@@ -15,8 +13,7 @@ import {ImNewspaper} from "react-icons/im";
 
 
 
-
-export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brushExtent, lineChartFiltedredNews, setLineChartFiltedredNews}) => {
+export const Line_chart = ({setBrushExtent, filteredNews, brushExtent, setLineChartFiltedredNews, loading, pastResultSearchNews, setPastResultSearchNews, setKeywords, setThreeDImageData, setFilteredNews, setSearchTermHistory}) => {
 
     console.log("este é o tamanho do filtered news" + filteredNews.length)
 
@@ -24,6 +21,60 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
     const [arrayLenght, getArrayLength] = useState(newsLength);
     const [stateNumberOfDatesBetweenTheStartingAndEndDate, setnumberOfDatesBetweenTheStartingAndEndDate] = useState(0);
+
+    const handleMultiModalMouseClickRequest = (news, imageIndex) => {
+
+
+
+        const news_id = news._id + "_" + news._source.parsed_section[imageIndex].order
+
+        //https://dissertationserver.herokuapp.com/
+        axios.get('http://localhost:3000/api/request/similarNews/byText/' + news_id ,{
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+                'Access-Control-Allow-Headers': 'application/json'
+            }
+        }).then(response =>{
+
+
+            setKeywords(response.data.keywords)
+            setThreeDImageData(response.data)
+            setFilteredNews(response.data.searchWordResult.body.hits.hits)
+            setLineChartFiltedredNews(response.data.searchWordResult.body.hits.hits)
+            pastResultSearchNews.push(response.data.searchWordResult.body.hits.hits)
+            setPastResultSearchNews(pastResultSearchNews)
+
+        })
+    }
+
+    const handleVisualMouseClickRequest = (news, imageIndex) => {
+
+        console.log("yelele", news)
+        console.log("!!", imageIndex)
+        const news_id = news._id + "_" + news._source.parsed_section[imageIndex].order
+
+        console.log("!!!", news_id)
+
+        //https://dissertationserver.herokuapp.com
+        axios.get('http://localhost:3000/api/request/similarNews/byImage/' + news_id ,{
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, OPTIONS',
+                'Access-Control-Allow-Headers': 'application/json'
+            }
+        }).then(response =>{
+
+
+            setKeywords(response.data.keywords)
+            setThreeDImageData(response.data)
+            setFilteredNews(response.data.searchWordResult.body.hits.hits)
+            setLineChartFiltedredNews(response.data.searchWordResult.body.hits.hits)
+            pastResultSearchNews.push(response.data.searchWordResult.body.hits.hits)
+            setPastResultSearchNews(pastResultSearchNews)
+
+        })
+    }
 
 
 
@@ -34,12 +85,13 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
 
         useEffect(() => {
+
             setnumberOfDatesBetweenTheStartingAndEndDate(filteredNews.length)
             let svg = d3.select(svgRef.current)
             svg.selectAll('*').remove();
 
             // set the dimensions and margins of the graph
-            const margin = {top: 10, right: 30, bottom: 30, left: 25},
+            const margin = {top: 10, right: 30, bottom: 30, left: 45},
                 // eslint-disable-next-line no-restricted-globals
                 width = (outerWidth * 0.50) - margin.left - margin.right,
                 // eslint-disable-next-line no-restricted-globals
@@ -525,8 +577,6 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
 
                     isTooltipClicked = !isTooltipClicked
 
-                    const informationWidth = (width * 0.01)
-                    const informationHeight = (height * 0.02)
 
                     //buscar o lugar da imagem nos dados
                     let imageIndex = 0
@@ -537,13 +587,17 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                     tooltip.html( `<div class="card border-success"
                     style="width: 220px; z-index: 10; position: absolute;"><div class="carousel slide"
                     style="border-radius: 50%;"><div class="carousel-indicators"><button type="button" data-bs-target="" aria-label="Slide 1" class="active" aria-current="true"></button></div><div class="carousel-inner"><div class="active carousel-item" style="width: 100%;"><img class="d-block w-100" src="https://large.novasearch.org/nytimes/images/${d._source.parsed_section[imageIndex].hash }.jpg"  alt="First slide" style="width: 100%; height: 100px; object-fit: cover; overflow: hidden;"></div></div><a class="carousel-control-prev" role="button" href="#"><span class="visually-hidden">Previous</span></a><a class="carousel-control-next" role="button" href="#"><span class="visually-hidden">none</span></a></div><div class="card-body"><div class="card-title h5" style="font-size: .95em;"> ${d._source.headline.main} </div><div class="mb-2 text-muted card-subtitle h6" style="font-size: 0.75em;">${d._source.pub_date.substring(0, 10)}</div><p class="card-text" style="font-family: unset; font-size: 0.70em;">${d._source.snippet}</p>
-                 <button class="p-button p-component p-button-rounded p-button-secondary p-button-text p-button-icon-only"><span class="p-button-icon p-c pi pi-bookmark"></span><svg stroke="currentColor" fill="currentColor" stroke-width="0" version="1.1" viewBox="0 0 16 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 20px;"><path d="M14 4v-2h-14v11c0 0.552 0.448 1 1 1h13.5c0.828 0 1.5-0.672 1.5-1.5v-8.5h-2zM13 13h-12v-10h12v10zM2 5h10v1h-10zM8 7h4v1h-4zM8 9h4v1h-4zM8 11h3v1h-3zM2 7h5v5h-5z"></path></svg></button>
-                <button class="p-button p-component p-button-rounded p-button-secondary p-button-text p-button-icon-only"><span class="p-button-icon p-c pi pi-bookmark"></span><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 17px;"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"></path><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"></path></svg></button>
+                 <button id="multiModalButton" class="p-button p-component p-button-rounded p-button-secondary p-button-text p-button-icon-only"><span class="p-button-icon p-c pi pi-bookmark"></span><svg stroke="currentColor" fill="currentColor" stroke-width="0" version="1.1" viewBox="0 0 16 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 20px;"><path d="M14 4v-2h-14v11c0 0.552 0.448 1 1 1h13.5c0.828 0 1.5-0.672 1.5-1.5v-8.5h-2zM13 13h-12v-10h12v10zM2 5h10v1h-10zM8 7h4v1h-4zM8 9h4v1h-4zM8 11h3v1h-3zM2 7h5v5h-5z"></path></svg></button>
+                <button id="imageButton" class="p-button p-component p-button-rounded p-button-secondary p-button-text p-button-icon-only"><span class="p-button-icon p-c pi pi-bookmark"></span><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 16 16" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg" style="width: 100%; height: 17px;"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"></path><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"></path></svg></button>
                  <a class="card-link" variant="primary" href="${d._source.web_url}" style="font-family: arial; font-size: 0.75em; float: right; margin-top: 3%;">See more</a></div></div>`)
                         .style('left', (event.pageX * 1.02) + 'px')
                         .style('top', (event.pageY * 1.02 + 'px'))
 
-                                    }
+
+                    document.getElementById("imageButton").addEventListener("click", () => {handleVisualMouseClickRequest(d, imageIndex); setSearchTermHistory(searchTermHistory => [...searchTermHistory, d._source.headline.main + " (image)"])})
+                    document.getElementById("multiModalButton").addEventListener("click", () => {handleMultiModalMouseClickRequest(d, imageIndex); setSearchTermHistory(searchTermHistory => [...searchTermHistory, d._source.headline.main + " (multiModal)"])})
+                }
+
 
 
             function handleMouseOver(event, d, i) {  // Add interactivity
@@ -607,13 +661,13 @@ export const Line_chart = ({setBrushExtent, setFilteredNews, filteredNews, brush
                 // Specify where to put label of text
             }
         }
-        }, [filteredNews]);
+        }, [filteredNews, loading]);
 
 
 
     return (
 
-        <div id='linechart'>
+        loading ? <ProgressSpinner style={{paddingTop:"50%" ,width: '50px', height: '50px', display: "flex", justifyContent: "center", alignItems: "center"}} strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s"/> : <div id='linechart'>
             <Container >
                 <Row style={{width: "100%"}}>
                     <Col >
